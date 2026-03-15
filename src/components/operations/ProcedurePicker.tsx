@@ -1,0 +1,150 @@
+import { useState, useRef, useEffect } from 'react';
+import { X, Search, ChevronDown } from 'lucide-react';
+import type { ProcedureType } from '../../types';
+
+interface Props {
+  selected: string[];
+  onChange: (ids: string[]) => void;
+  procedures: ProcedureType[];
+}
+
+export function ProcedurePicker({ selected, onChange, procedures }: Props) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const q = search.toLowerCase().trim();
+  const filtered = q
+    ? procedures.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.specialty.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        (p.subcategory?.toLowerCase().includes(q) ?? false),
+      )
+    : procedures;
+
+  // Group: specialty → category → procedures
+  const specialties = [...new Set(filtered.map(p => p.specialty))].sort();
+  const grouped = specialties.map(sp => {
+    const spProcs = filtered.filter(p => p.specialty === sp);
+    const categories = [...new Set(spProcs.map(p => p.category))];
+    return {
+      specialty: sp,
+      categories: categories.map(cat => ({
+        category: cat,
+        items: spProcs.filter(p => p.category === cat),
+      })),
+    };
+  });
+
+  function toggle(id: string) {
+    onChange(selected.includes(id) ? selected.filter(c => c !== id) : [...selected, id]);
+  }
+
+  const selectedProcs = selected
+    .map(id => procedures.find(p => p.id === id))
+    .filter(Boolean) as ProcedureType[];
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-sm font-medium text-text-muted mb-1">Procedures</label>
+
+      {/* Selected chips + open trigger */}
+      <div
+        className="min-h-[42px] border border-border rounded-lg px-3 py-2 bg-white cursor-pointer flex flex-wrap gap-1.5 items-center"
+        onClick={() => { setOpen(!open); }}
+      >
+        {selectedProcs.length === 0 && (
+          <span className="text-text-muted text-sm flex-1">Select procedures...</span>
+        )}
+        {selectedProcs.map(p => (
+          <span key={p.id} className="inline-flex items-center gap-1 bg-blue-100 text-primary text-xs px-2 py-0.5 rounded-full">
+            <span className="font-medium">{p.name}</span>
+            {p.subcategory && <span className="opacity-70">({p.subcategory})</span>}
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); toggle(p.id); }}
+              className="hover:text-danger ml-0.5"
+            >
+              <X size={12} />
+            </button>
+          </span>
+        ))}
+        <ChevronDown
+          size={16}
+          className={`ml-auto text-text-muted shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </div>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto">
+          {/* Search bar */}
+          <div className="sticky top-0 bg-white p-2 border-b border-border">
+            <div className="relative">
+              <Search size={15} className="absolute left-2.5 top-2.5 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search by name, specialty or category..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-light"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {grouped.length === 0 && (
+            <p className="px-3 py-4 text-sm text-text-muted text-center">No procedures found</p>
+          )}
+
+          {grouped.map(({ specialty, categories }) => (
+            <div key={specialty}>
+              {/* Specialty header */}
+              <div className="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider sticky top-[52px]">
+                {specialty}
+              </div>
+
+              {categories.map(({ category, items }) => (
+                <div key={category}>
+                  {/* Category sub-header */}
+                  <div className="px-4 py-1 bg-gray-50 text-xs font-semibold text-text-muted uppercase tracking-wide">
+                    {category}
+                  </div>
+
+                  {items.map(p => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => toggle(p.id)}
+                      className={`w-full text-left px-5 py-2 text-sm hover:bg-blue-50 flex items-center justify-between gap-2 ${
+                        selected.includes(p.id) ? 'bg-blue-50 text-primary font-medium' : ''
+                      }`}
+                    >
+                      <span>
+                        {p.name}
+                        {p.subcategory && (
+                          <span className="ml-1 text-text-muted font-normal">({p.subcategory})</span>
+                        )}
+                      </span>
+                      {selected.includes(p.id) && (
+                        <span className="text-primary shrink-0">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
