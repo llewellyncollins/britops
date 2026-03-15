@@ -75,27 +75,50 @@ User action → React component → useOperations hook → Dexie (IndexedDB)
 ### Key Types
 
 ```typescript
-type InvolvementLevel = 'assistant' | 'supervised' | 'independent'
+type InvolvementLevel = "assistant" | "supervised" | "independent";
 
 interface OperationEntry {
-  id: string; userId: string; date: string; patientId: string;
-  chemotherapy: string; diagnosis: string; procedures: string[];
-  involvement: InvolvementLevel; otherDetails: string;
-  intraOpComplications: string; postOpComplications: string;
-  histology: string; followUp: string; complexityScore: number | null;
-  pci: number | null; discussedMDT: boolean; notes: string;
-  createdAt: string; updatedAt: string; deleted: boolean;
+  id: string;
+  userId: string;
+  date: string;
+  patientId: string;
+  chemotherapy: string;
+  diagnosis: string;
+  procedures: string[];
+  involvement: InvolvementLevel;
+  otherDetails: string;
+  intraOpComplications: string;
+  postOpComplications: string;
+  histology: string;
+  followUp: string;
+  complexityScore: number | null;
+  pci: number | null;
+  discussedMDT: boolean;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  deleted: boolean;
 }
 
 interface ProcedureType {
-  id: string; name: string; category: string;
-  subcategory?: string; specialty: string; isCustom: boolean;
+  id: string;
+  name: string;
+  category: string;
+  subcategory?: string;
+  specialty: string;
+  isCustom: boolean;
 }
 
 interface PortfolioRow {
-  procedureId: string; procedure: string; category: string;
-  subcategory?: string; specialty: string;
-  total: number; assistant: number; supervised: number; independent: number;
+  procedureId: string;
+  procedure: string;
+  category: string;
+  subcategory?: string;
+  specialty: string;
+  total: number;
+  assistant: number;
+  supervised: number;
+  independent: number;
 }
 ```
 
@@ -114,22 +137,22 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 
 ### Custom Hooks
 
-| Hook | Purpose |
-|---|---|
-| `useAuth()` | Firebase auth state: `{ user, loading, isConfigured }` |
-| `useOperations()` | Dexie CRUD for operations: `{ operations, addOperation, updateOperation, deleteOperation }` |
-| `usePortfolio(ops, procs)` | Memoized aggregation of operations into PortfolioRow[] |
-| `useProcedureTypes()` | Merges 213 defaults with custom types. Supports hiding defaults via `__hidden__` prefix |
-| `useSync(user)` | Bidirectional Dexie ↔ Firestore sync with Dexie hooks and Firestore real-time listeners |
+| Hook                       | Purpose                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `useAuth()`                | Firebase auth state: `{ user, loading, isConfigured }`                                      |
+| `useOperations()`          | Dexie CRUD for operations: `{ operations, addOperation, updateOperation, deleteOperation }` |
+| `usePortfolio(ops, procs)` | Memoized aggregation of operations into PortfolioRow[]                                      |
+| `useProcedureTypes()`      | Merges 213 defaults with custom types. Supports hiding defaults via `__hidden__` prefix     |
+| `useSync(user)`            | Bidirectional Dexie ↔ Firestore sync with Dexie hooks and Firestore real-time listeners     |
 
 ## Deployment Pipeline
 
 ### Environments
 
-| Environment | Branch | Firebase Target | URL |
-|---|---|---|---|
-| Staging | `main` | `britops-staging` | britops-staging.web.app |
-| Production | `production` | `britops-1f219` | britops-1f219.web.app |
+| Environment | Branch       | Firebase Target   | URL                     |
+| ----------- | ------------ | ----------------- | ----------------------- |
+| Staging     | `main`       | `britops-staging` | britops-staging.web.app |
+| Production  | `production` | `britops-1f219`   | britops-1f219.web.app   |
 
 ### Flow
 
@@ -142,16 +165,16 @@ Merge main → production    → Deploy to production (requires GitHub environme
 
 ### GitHub Actions Workflows
 
-| Workflow | Trigger | Jobs |
-|---|---|---|
-| `ci.yml` | Push to main/production, PR to main | lint-and-build, unit-and-integration-tests, e2e-tests |
-| `deploy-staging.yml` | CI passes on main | Build with STAGING secrets → Firebase deploy |
-| `deploy-production.yml` | CI passes on production | Build with PROD secrets → Firebase deploy (environment gate) |
-| `preview.yml` | CI passes on PR | Build → Firebase preview channel |
+| Workflow                | Trigger                             | Jobs                                                         |
+| ----------------------- | ----------------------------------- | ------------------------------------------------------------ |
+| `ci.yml`                | Push to main/production, PR to main | lint-and-build, unit-and-integration-tests, e2e-tests        |
+| `deploy-staging.yml`    | CI passes on main                   | Build with STAGING secrets → Firebase deploy                 |
+| `deploy-production.yml` | CI passes on production             | Build with PROD secrets → Firebase deploy (environment gate) |
+| `preview.yml`           | CI passes on PR                     | Build → Firebase preview channel                             |
 
 ### Required GitHub Secrets
 
-`FIREBASE_SERVICE_ACCOUNT`, `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_AUTH_DOMAIN`, `STAGING_FIREBASE_PROJECT_ID`, `STAGING_FIREBASE_STORAGE_BUCKET`, `STAGING_FIREBASE_MESSAGING_SENDER_ID`, `STAGING_FIREBASE_APP_ID`, and `PROD_*` equivalents.
+`FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219`, `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_AUTH_DOMAIN`, `STAGING_FIREBASE_PROJECT_ID`, `STAGING_FIREBASE_STORAGE_BUCKET`, `STAGING_FIREBASE_MESSAGING_SENDER_ID`, `STAGING_FIREBASE_APP_ID`, and `PROD_*` equivalents.
 
 ### Local Pre-Push Hook
 
