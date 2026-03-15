@@ -41,8 +41,8 @@ export function SettingsPage() {
       setShowLogin(false);
       setLoginEmail('');
       setLoginPassword('');
-    } catch (err: any) {
-      setLoginError(err.message?.replace('Firebase: ', '') ?? 'Authentication failed');
+    } catch (err: unknown) {
+      setLoginError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Authentication failed');
     } finally {
       setLoginLoading(false);
     }
@@ -53,8 +53,8 @@ export function SettingsPage() {
     try {
       await signInGoogle();
       setShowLogin(false);
-    } catch (err: any) {
-      setLoginError(err.message?.replace('Firebase: ', '') ?? 'Google sign-in failed');
+    } catch (err: unknown) {
+      setLoginError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Google sign-in failed');
     }
   }
 
@@ -107,8 +107,8 @@ export function SettingsPage() {
         count++;
       }
       setImportResult(`Imported ${count} operations successfully`);
-    } catch (err: any) {
-      setImportResult(`Import failed: ${err.message}`);
+    } catch (err: unknown) {
+      setImportResult(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

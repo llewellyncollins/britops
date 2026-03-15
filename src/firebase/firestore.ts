@@ -128,7 +128,7 @@ export function subscribeToProcedureTypes(
     const entries: ProcedureType[] = [];
     snapshot.forEach(d => {
       // Strip the Firestore-only userId field before storing locally
-      const { userId: _uid, ...entry } = d.data() as ProcedureType & { userId?: string };
+      const { userId: _uid, ...entry } = d.data() as ProcedureType & { userId?: string }; // eslint-disable-line @typescript-eslint/no-unused-vars
       entries.push(entry as ProcedureType);
     });
     onUpdate(entries);

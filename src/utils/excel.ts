@@ -152,7 +152,7 @@ function parseRow(
 }
 
 export function parseFlexibleDate(s: string): string {
-  const parts = s.match(/(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})/);
+  const parts = s.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
   if (parts) {
     const day = parts[1].padStart(2, '0');
     const month = parts[2].padStart(2, '0');

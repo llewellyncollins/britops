@@ -22,8 +22,8 @@ export function Login() {
         await signInEmail(email, password);
       }
       navigate('/');
-    } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '') ?? 'Authentication failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -34,8 +34,8 @@ export function Login() {
     try {
       await signInGoogle();
       navigate('/');
-    } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '') ?? 'Google sign-in failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Google sign-in failed');
     }
   }
 
