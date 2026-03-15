@@ -151,7 +151,7 @@ function parseRow(
   };
 }
 
-function parseFlexibleDate(s: string): string {
+export function parseFlexibleDate(s: string): string {
   const parts = s.match(/(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})/);
   if (parts) {
     const day = parts[1].padStart(2, '0');
@@ -169,7 +169,7 @@ function parseFlexibleDate(s: string): string {
  * Best-effort text → procedure ID matching for import.
  * Tries exact match first, then partial name match.
  */
-function matchProcedures(text: string, procedures: ProcedureType[]): string[] {
+export function matchProcedures(text: string, procedures: ProcedureType[]): string[] {
   if (!text.trim()) return ['gen_other'];
 
   const parts = text.split(/[,;|]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
