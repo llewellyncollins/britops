@@ -2,15 +2,35 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
   build: {
+    target: 'es2020',
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
+        compact: true,
         manualChunks: {
           firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
           xlsx: ['xlsx'],
-          vendor: ['react', 'react-dom', 'react-router-dom', 'dexie', 'dexie-react-hooks'],
+          vendor: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            'dexie',
+            'dexie-react-hooks',
+            'lucide-react',
+            'react-hook-form',
+            '@hookform/resolvers',
+            'zod',
+            'class-variance-authority',
+            'tailwind-merge',
+            'clsx',
+            'uuid',
+            'zustand',
+          ],
         },
       },
     },
@@ -46,5 +66,13 @@ export default defineConfig({
         ],
       },
     }),
+    process.env.ANALYZE === 'true' &&
+      visualizer({
+        open: true,
+        filename: 'dist/stats.html',
+        gzipSize: true,
+        brotliSize: true,
+        template: 'treemap',
+      }),
   ],
 })

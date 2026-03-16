@@ -1,0 +1,32 @@
+[
+  {
+    "name": "app index chunk",
+    "path": "dist/assets/index-*.js",
+    "limit": "80 KB",
+    "brotli": true
+  },
+  {
+    "name": "vendor chunk",
+    "path": "dist/assets/vendor-*.js",
+    "limit": "100 KB",
+    "brotli": true
+  },
+  {
+    "name": "firebase chunk",
+    "path": "dist/assets/firebase-*.js",
+    "limit": "130 KB",
+    "brotli": true
+  },
+  {
+    "name": "xlsx chunk",
+    "path": "dist/assets/xlsx-*.js",
+    "limit": "140 KB",
+    "brotli": true
+  },
+  {
+    "name": "CSS",
+    "path": "dist/assets/index-*.css",
+    "limit": "10 KB",
+    "brotli": true
+  }
+]
