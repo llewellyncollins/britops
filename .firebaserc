@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "britops-1f219"
+  },
+  "targets": {
+    "britops-1f219": {
+      "hosting": {
+        "production": [
+          "britops-1f219"
+        ],
+        "staging": [
+          "britops-staging"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

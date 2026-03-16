@@ -19,7 +19,6 @@ dist-ssr
 
 # Firebase
 .firebase/
-.firebaserc
 
 # Test output
 coverage/
