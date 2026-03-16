@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../db/dexie';
 import { useOperations } from '../hooks/useOperations';
 import { usePortfolio } from '../hooks/usePortfolio';
@@ -6,14 +7,17 @@ import { useProcedureTypes } from '../hooks/useProcedureTypes';
 import { useAuth } from '../hooks/useAuth';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { exportPortfolioXlsx, importFromXlsx } from '../utils/excel';
-import { signOut, signInEmail, signUpEmail, signInGoogle } from '../firebase/auth';
+import { exportAllDataJson } from '../utils/export';
+import { signOut, signInEmail, signUpEmail, signInGoogle, deleteAccount } from '../firebase/auth';
+import { saveConsentRecord } from '../firebase/firestore';
 import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManager';
 import {
-  Download, Upload, Trash2, FileSpreadsheet,
-  LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap,
+  Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
+  LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap, AlertTriangle,
 } from 'lucide-react';
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const { operations, addOperation } = useOperations();
   const { allProcedures, specialties } = useProcedureTypes();
   const { specialty, setSpecialty } = useSettingsStore();
@@ -28,6 +32,10 @@ export function SettingsPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [deleteConfirmStep, setDeleteConfirmStep] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleLogin(e: React.FormEvent) {
@@ -36,13 +44,20 @@ export function SettingsPage() {
     setLoginLoading(true);
     try {
       if (isSignUp) {
-        await signUpEmail(loginEmail, loginPassword);
+        const cred = await signUpEmail(loginEmail, loginPassword);
+        await saveConsentRecord({
+          userId: cred.user.uid,
+          consentGiven: true,
+          consentTimestamp: new Date().toISOString(),
+          privacyPolicyVersion: '1.0',
+        });
       } else {
         await signInEmail(loginEmail, loginPassword);
       }
       setShowLogin(false);
       setLoginEmail('');
       setLoginPassword('');
+      setConsentChecked(false);
     } catch (err: unknown) {
       setLoginError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Authentication failed');
     } finally {
@@ -53,10 +68,39 @@ export function SettingsPage() {
   async function handleGoogleSignIn() {
     setLoginError('');
     try {
-      await signInGoogle();
+      const cred = await signInGoogle();
+      // Store consent for new Google sign-ups too
+      await saveConsentRecord({
+        userId: cred.user.uid,
+        consentGiven: true,
+        consentTimestamp: new Date().toISOString(),
+        privacyPolicyVersion: '1.0',
+      });
       setShowLogin(false);
     } catch (err: unknown) {
       setLoginError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Google sign-in failed');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmStep === 0) {
+      setDeleteConfirmStep(1);
+      return;
+    }
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await deleteAccount();
+      navigate('/login');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Deletion failed';
+      if (msg.includes('requires-recent-login')) {
+        setDeleteError('Please sign out and sign back in, then try again. Firebase requires recent authentication for account deletion.');
+      } else {
+        setDeleteError(msg);
+      }
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -194,10 +238,26 @@ export function SettingsPage() {
                       minLength={6}
                       className="input"
                     />
+                    {isSignUp && (
+                      <label className="flex items-start gap-2 text-xs text-text-muted">
+                        <input
+                          type="checkbox"
+                          checked={consentChecked}
+                          onChange={e => setConsentChecked(e.target.checked)}
+                          className="mt-0.5"
+                        />
+                        <span>
+                          I have read and agree to the{' '}
+                          <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                          {' '}and{' '}
+                          <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+                        </span>
+                      </label>
+                    )}
                     {loginError && <p className="text-sm text-danger">{loginError}</p>}
                     <button
                       type="submit"
-                      disabled={loginLoading}
+                      disabled={loginLoading || (isSignUp && !consentChecked)}
                       className="w-full bg-primary text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary-dark disabled:opacity-50"
                     >
                       <LogIn size={16} />
@@ -213,7 +273,7 @@ export function SettingsPage() {
                   </button>
                   <p className="text-center text-xs text-text-muted">
                     {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                    <button onClick={() => { setIsSignUp(!isSignUp); setLoginError(''); }} className="text-primary hover:underline">
+                    <button onClick={() => { setIsSignUp(!isSignUp); setLoginError(''); setConsentChecked(false); }} className="text-primary hover:underline">
                       {isSignUp ? 'Sign in' : 'Create one'}
                     </button>
                   </p>
@@ -271,6 +331,19 @@ export function SettingsPage() {
             <p className="text-xs text-text-muted">Download all operations as CSV</p>
           </div>
         </button>
+
+        {user && (
+          <button
+            onClick={() => exportAllDataJson(user.uid)}
+            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+          >
+            <FileJson size={20} className="text-primary" />
+            <div className="text-left">
+              <p className="font-medium text-sm">Export All My Data (JSON)</p>
+              <p className="text-xs text-text-muted">Complete data export for GDPR portability</p>
+            </div>
+          </button>
+        )}
       </section>
 
       {/* Import */}
@@ -302,6 +375,35 @@ export function SettingsPage() {
         )}
       </section>
 
+      {/* Privacy & Data */}
+      <section className="space-y-3">
+        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Privacy &amp; Data</h3>
+
+        <Link
+          to="/privacy"
+          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+        >
+          <Shield size={20} className="text-primary" />
+          <div className="text-left flex-1">
+            <p className="font-medium text-sm">Privacy Policy</p>
+            <p className="text-xs text-text-muted">How your data is collected, stored, and protected</p>
+          </div>
+          <ExternalLink size={16} className="text-text-muted" />
+        </Link>
+
+        <Link
+          to="/terms"
+          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+        >
+          <FileSpreadsheet size={20} className="text-primary" />
+          <div className="text-left flex-1">
+            <p className="font-medium text-sm">Terms of Service</p>
+            <p className="text-xs text-text-muted">Usage terms and clinical disclaimer</p>
+          </div>
+          <ExternalLink size={16} className="text-text-muted" />
+        </Link>
+      </section>
+
       {/* Danger Zone */}
       <section className="space-y-3">
         <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Danger Zone</h3>
@@ -315,6 +417,37 @@ export function SettingsPage() {
             <p className="text-xs text-text-muted">Permanently delete all local operation data</p>
           </div>
         </button>
+
+        {user && (
+          <div className="space-y-2">
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-red-200 rounded-lg hover:border-danger transition-colors"
+            >
+              <AlertTriangle size={20} className="text-danger" />
+              <div className="text-left">
+                <p className="font-medium text-sm text-danger">
+                  {deleting ? 'Deleting...' : deleteConfirmStep === 0 ? 'Delete Account & All Data' : 'Confirm: Delete Everything'}
+                </p>
+                <p className="text-xs text-text-muted">
+                  {deleteConfirmStep === 0
+                    ? 'Permanently remove your account and all cloud data'
+                    : 'This cannot be undone. All operations, settings, and your account will be permanently deleted.'}
+                </p>
+              </div>
+            </button>
+            {deleteConfirmStep === 1 && !deleting && (
+              <button
+                onClick={() => setDeleteConfirmStep(0)}
+                className="w-full text-sm text-text-muted hover:text-text"
+              >
+                Cancel
+              </button>
+            )}
+            {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+          </div>
+        )}
       </section>
 
       {/* About */}
@@ -324,6 +457,9 @@ export function SettingsPage() {
         <p className="text-xs text-text-muted">
           Data stored locally on device.{' '}
           {isConfigured ? 'Firebase sync available.' : 'Configure Firebase for cloud sync.'}
+        </p>
+        <p className="text-xs text-text-muted">
+          Deleted operations are permanently purged after 30 days.
         </p>
       </section>
     </div>

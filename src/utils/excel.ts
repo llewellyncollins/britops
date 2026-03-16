@@ -82,7 +82,7 @@ export function exportPortfolioXlsx(
 export function importFromXlsx(
   file: File,
   procedures: ProcedureType[],
-): Promise<Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted'>[]> {
+): Promise<Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted' | 'deletedAt'>[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -97,7 +97,7 @@ export function importFromXlsx(
         const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(logSheet);
         const entries = data
           .map(row => parseRow(row, procedures))
-          .filter(Boolean) as Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted'>[];
+          .filter(Boolean) as Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted' | 'deletedAt'>[];
         resolve(entries);
       } catch (err) {
         reject(err);
@@ -111,7 +111,7 @@ export function importFromXlsx(
 function parseRow(
   row: Record<string, unknown>,
   procedures: ProcedureType[],
-): Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted'> | null {
+): Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted' | 'deletedAt'> | null {
   const dateVal = row['Date'] ?? row['date'];
   if (!dateVal) return null;
 

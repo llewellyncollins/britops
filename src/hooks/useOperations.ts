@@ -17,7 +17,7 @@ export function useOperations() {
     []
   );
 
-  async function addOperation(data: Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted'>) {
+  async function addOperation(data: Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted' | 'deletedAt'>) {
     const now = new Date().toISOString();
     const entry: OperationEntry = {
       ...data,
@@ -26,6 +26,7 @@ export function useOperations() {
       createdAt: now,
       updatedAt: now,
       deleted: false,
+      deletedAt: null,
     };
     await db.operations.add(entry);
     return entry;
@@ -36,7 +37,8 @@ export function useOperations() {
   }
 
   async function deleteOperation(id: string) {
-    await db.operations.update(id, { deleted: true, updatedAt: new Date().toISOString() });
+    const now = new Date().toISOString();
+    await db.operations.update(id, { deleted: true, deletedAt: now, updatedAt: now });
   }
 
   return { operations: operations ?? [], addOperation, updateOperation, deleteOperation };

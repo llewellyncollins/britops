@@ -30,6 +30,15 @@ export interface OperationEntry {
   createdAt: string;
   updatedAt: string;
   deleted: boolean;
+  /** ISO timestamp set when soft-deleted. Firestore TTL policy auto-purges 30 days after this. */
+  deletedAt: string | null;
+}
+
+export interface ConsentRecord {
+  userId: string;
+  consentGiven: boolean;
+  consentTimestamp: string;
+  privacyPolicyVersion: string;
 }
 
 export interface PortfolioRow {

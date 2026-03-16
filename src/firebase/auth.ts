@@ -4,10 +4,13 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut as fbSignOut,
+  deleteUser,
   onAuthStateChanged,
   type User,
 } from 'firebase/auth';
 import { auth } from './config';
+import { purgeAllUserData } from './firestore';
+import { db } from '../db/dexie';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -29,6 +32,22 @@ export async function signInGoogle() {
 export async function signOut() {
   if (!auth) throw new Error('Firebase not configured');
   return fbSignOut(auth);
+}
+
+export async function deleteAccount(): Promise<void> {
+  if (!auth?.currentUser) throw new Error('Not signed in');
+  const user = auth.currentUser;
+
+  // Purge all cloud data BEFORE deleting the auth account
+  await purgeAllUserData(user.uid);
+
+  // Clear all local data
+  await db.operations.clear();
+  await db.procedureTypes.clear();
+  localStorage.removeItem('britops-settings');
+
+  // Delete the Firebase Auth account
+  await deleteUser(user);
 }
 
 export function onAuthChange(callback: (user: User | null) => void) {

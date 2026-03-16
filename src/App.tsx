@@ -5,6 +5,8 @@ import { LogOperation } from './pages/LogOperation';
 import { EditOperation } from './pages/EditOperation';
 import { Portfolio } from './pages/Portfolio';
 import { SettingsPage } from './pages/SettingsPage';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
 import { Login } from './pages/Login';
 import { useAuth } from './hooks/useAuth';
 import { useSync } from './hooks/useSync';
@@ -19,6 +21,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route element={<AppShell />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/log" element={<LogOperation />} />

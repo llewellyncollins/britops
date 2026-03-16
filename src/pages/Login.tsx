@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { signInEmail, signUpEmail, signInGoogle } from '../firebase/auth';
+import { saveConsentRecord } from '../firebase/firestore';
 import { LogIn } from 'lucide-react';
 
 export function Login() {
@@ -8,6 +9,7 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +19,13 @@ export function Login() {
     setLoading(true);
     try {
       if (isSignUp) {
-        await signUpEmail(email, password);
+        const cred = await signUpEmail(email, password);
+        await saveConsentRecord({
+          userId: cred.user.uid,
+          consentGiven: true,
+          consentTimestamp: new Date().toISOString(),
+          privacyPolicyVersion: '1.0',
+        });
       } else {
         await signInEmail(email, password);
       }
@@ -32,7 +40,13 @@ export function Login() {
   async function handleGoogle() {
     setError('');
     try {
-      await signInGoogle();
+      const cred = await signInGoogle();
+      await saveConsentRecord({
+        userId: cred.user.uid,
+        consentGiven: true,
+        consentTimestamp: new Date().toISOString(),
+        privacyPolicyVersion: '1.0',
+      });
       navigate('/');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Google sign-in failed');
@@ -70,11 +84,28 @@ export function Login() {
             />
           </div>
 
+          {isSignUp && (
+            <label className="flex items-start gap-2 text-xs text-text-muted">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={e => setConsentChecked(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                I have read and agree to the{' '}
+                <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                {' '}and{' '}
+                <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+              </span>
+            </label>
+          )}
+
           {error && <p className="text-sm text-danger">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (isSignUp && !consentChecked)}
             className="w-full bg-primary text-white py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-dark disabled:opacity-50"
           >
             <LogIn size={18} />
@@ -92,7 +123,7 @@ export function Login() {
 
         <p className="text-center text-sm text-text-muted">
           {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary hover:underline">
+          <button onClick={() => { setIsSignUp(!isSignUp); setConsentChecked(false); }} className="text-primary hover:underline">
             {isSignUp ? 'Sign in' : 'Create one'}
           </button>
         </p>
@@ -103,6 +134,13 @@ export function Login() {
         >
           Continue without account (offline only)
         </button>
+
+        <p className="text-center text-xs text-text-muted">
+          By using BritOps you agree to our{' '}
+          <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+          {' '}and{' '}
+          <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+        </p>
       </div>
     </div>
   );

@@ -3,6 +3,8 @@ import {
   doc,
   setDoc,
   deleteDoc,
+  getDoc,
+  getDocs,
   query,
   where,
   onSnapshot,
@@ -10,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { firestore, isConfigured } from './config';
 import { db } from '../db/dexie';
-import type { OperationEntry, ProcedureType } from '../types';
+import type { OperationEntry, ProcedureType, ConsentRecord } from '../types';
 import type { UserSettings } from '../stores/useSettingsStore';
 
 // ─── Operations ────────────────────────────────────────────────────────────────
@@ -174,4 +176,53 @@ export function subscribeToUserSettings(
       onUpdate(snapshot.data() as UserSettings);
     }
   });
+}
+
+// ─── Consent Records ─────────────────────────────────────────────────────────
+
+const CONSENTS_COLLECTION = 'consents';
+
+export async function saveConsentRecord(record: ConsentRecord): Promise<void> {
+  if (!firestore || !isConfigured) return;
+  const ref = doc(firestore, CONSENTS_COLLECTION, record.userId);
+  await setDoc(ref, record);
+}
+
+export async function getConsentRecord(userId: string): Promise<ConsentRecord | null> {
+  if (!firestore || !isConfigured) return null;
+  const ref = doc(firestore, CONSENTS_COLLECTION, userId);
+  const snap = await getDoc(ref);
+  return snap.exists() ? (snap.data() as ConsentRecord) : null;
+}
+
+// ─── Purge All User Data (for account deletion) ─────────────────────────────
+
+export async function purgeAllUserData(userId: string): Promise<void> {
+  if (!firestore || !isConfigured) return;
+
+  // Delete all operations
+  const opsQuery = query(
+    collection(firestore, OPS_COLLECTION),
+    where('userId', '==', userId),
+  );
+  const opsSnap = await getDocs(opsQuery);
+  for (const d of opsSnap.docs) {
+    await deleteDoc(d.ref);
+  }
+
+  // Delete all custom procedure types
+  const typesQuery = query(
+    collection(firestore, PROC_TYPES_COLLECTION),
+    where('userId', '==', userId),
+  );
+  const typesSnap = await getDocs(typesQuery);
+  for (const d of typesSnap.docs) {
+    await deleteDoc(d.ref);
+  }
+
+  // Delete user settings
+  await deleteDoc(doc(firestore, SETTINGS_COLLECTION, userId));
+
+  // Delete consent record
+  await deleteDoc(doc(firestore, CONSENTS_COLLECTION, userId));
 }

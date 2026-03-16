@@ -26,6 +26,7 @@ export function createOperation(
     createdAt: now,
     updatedAt: now,
     deleted: false,
+    deletedAt: null,
     ...overrides,
   };
 }
