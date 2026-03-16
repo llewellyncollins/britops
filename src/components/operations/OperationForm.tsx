@@ -81,9 +81,10 @@ function OperationFormInner({ specialty, existing }: { specialty: string | null;
 
   const defaultValues = getDefaultValues(specialty, existing as unknown as Record<string, unknown>);
 
-  const { control, handleSubmit, formState: { isSubmitting } } = useForm({
+  const { control, handleSubmit, formState: { isSubmitting, isValid } } = useForm({
     resolver: zodResolver(schema),
     defaultValues,
+    mode: 'onChange',
   });
 
   async function onSubmit(data: Record<string, unknown>) {
@@ -101,7 +102,7 @@ function OperationFormInner({ specialty, existing }: { specialty: string | null;
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !isValid}
         className="w-full bg-primary text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-dark disabled:opacity-50 transition-colors"
       >
         <Save size={18} />
