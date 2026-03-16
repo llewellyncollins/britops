@@ -10,7 +10,10 @@ import {
   deleteProcedureTypeFromFirestore,
   subscribeToProcedureTypes,
   syncProcedureTypesFromFirestore,
+  pushUserSettingsToFirestore,
+  subscribeToUserSettings,
 } from '../firebase/firestore';
+import { useSettingsStore } from '../stores/useSettingsStore';
 import { db } from '../db/dexie';
 import type { OperationEntry, ProcedureType } from '../types';
 
@@ -100,10 +103,31 @@ export function useSync(user: User | null) {
       await syncProcedureTypesFromFirestore(remoteTypes);
     });
 
+    const unsubSettings = subscribeToUserSettings(user.uid, (remoteSettings) => {
+      useSettingsStore.getState().setSettings(remoteSettings);
+    });
+
     return () => {
       unsubOps();
       unsubTypes();
+      unsubSettings();
     };
+  }, [user]);
+
+  // ── Effect 4: Push settings changes to Firestore ───────────────────────────
+  useEffect(() => {
+    if (!user || !isConfigured) return;
+
+    const unsub = useSettingsStore.subscribe((state) => {
+      const { specialty } = state;
+      pushUserSettingsToFirestore(user.uid, { specialty }).catch(console.error);
+    });
+
+    // Push current settings on first sign-in
+    const { specialty } = useSettingsStore.getState();
+    pushUserSettingsToFirestore(user.uid, { specialty }).catch(console.error);
+
+    return unsub;
   }, [user]);
 
   return { syncing };

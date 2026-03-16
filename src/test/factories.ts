@@ -18,7 +18,7 @@ export function createOperation(
     intraOpComplications: '',
     postOpComplications: '',
     histology: '',
-    followUp: '',
+    followUp: false,
     complexityScore: null,
     pci: null,
     discussedMDT: false,

@@ -4,17 +4,19 @@ import { useOperations } from '../hooks/useOperations';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useProcedureTypes } from '../hooks/useProcedureTypes';
 import { useAuth } from '../hooks/useAuth';
+import { useSettingsStore } from '../stores/useSettingsStore';
 import { exportPortfolioXlsx, importFromXlsx } from '../utils/excel';
 import { signOut, signInEmail, signUpEmail, signInGoogle } from '../firebase/auth';
 import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManager';
 import {
   Download, Upload, Trash2, FileSpreadsheet,
-  LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight,
+  LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap,
 } from 'lucide-react';
 
 export function SettingsPage() {
   const { operations, addOperation } = useOperations();
-  const { allProcedures } = useProcedureTypes();
+  const { allProcedures, specialties } = useProcedureTypes();
+  const { specialty, setSpecialty } = useSettingsStore();
   const portfolioRows = usePortfolio(operations, allProcedures);
   const { user, isConfigured } = useAuth();
   const [importing, setImporting] = useState(false);
@@ -78,7 +80,7 @@ export function SettingsPage() {
       return [
         op.date, op.patientId, op.diagnosis, procNames, op.involvement,
         op.otherDetails, op.intraOpComplications, op.postOpComplications,
-        op.histology, op.followUp, op.complexityScore ?? '', op.pci ?? '',
+        op.histology, op.followUp ? 'Yes' : 'No', op.complexityScore ?? '', op.pci ?? '',
         op.discussedMDT ? 'Yes' : 'No', op.notes,
       ];
     });
@@ -124,6 +126,29 @@ export function SettingsPage() {
   return (
     <div className="p-4 max-w-lg mx-auto space-y-6">
       <h2 className="text-xl font-bold">Settings</h2>
+
+      {/* Specialty */}
+      <section className="space-y-3">
+        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Your Specialty</h3>
+        <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
+          <GraduationCap size={20} className="text-primary" />
+          <div className="flex-1">
+            <select
+              value={specialty ?? ''}
+              onChange={e => setSpecialty(e.target.value || null)}
+              className="input"
+            >
+              <option value="">Not set (show all fields)</option>
+              {specialties.map(sp => (
+                <option key={sp} value={sp}>{sp}</option>
+              ))}
+            </select>
+            <p className="text-xs text-text-muted mt-1">
+              Tailors the operation form to show fields relevant to your specialty
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Account */}
       {isConfigured && (

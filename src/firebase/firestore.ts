@@ -11,6 +11,7 @@ import {
 import { firestore, isConfigured } from './config';
 import { db } from '../db/dexie';
 import type { OperationEntry, ProcedureType } from '../types';
+import type { UserSettings } from '../stores/useSettingsStore';
 
 // ─── Operations ────────────────────────────────────────────────────────────────
 
@@ -146,4 +147,31 @@ export async function syncProcedureTypesFromFirestore(
     if (!remote.isCustom) continue;
     await db.procedureTypes.put(remote);
   }
+}
+
+// ─── User Settings ──────────────────────────────────────────────────────────
+
+const SETTINGS_COLLECTION = 'userSettings';
+
+export async function pushUserSettingsToFirestore(
+  userId: string,
+  settings: UserSettings,
+): Promise<void> {
+  if (!firestore || !isConfigured) return;
+  const ref = doc(firestore, SETTINGS_COLLECTION, userId);
+  await setDoc(ref, settings, { merge: true });
+}
+
+export function subscribeToUserSettings(
+  userId: string,
+  onUpdate: (settings: UserSettings) => void,
+): Unsubscribe {
+  if (!firestore || !isConfigured) return () => {};
+
+  const ref = doc(firestore, SETTINGS_COLLECTION, userId);
+  return onSnapshot(ref, snapshot => {
+    if (snapshot.exists()) {
+      onUpdate(snapshot.data() as UserSettings);
+    }
+  });
 }

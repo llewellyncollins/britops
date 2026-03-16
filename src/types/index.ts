@@ -22,7 +22,7 @@ export interface OperationEntry {
   intraOpComplications: string;
   postOpComplications: string;
   histology: string;
-  followUp: string;
+  followUp: boolean;
   complexityScore: number | null;
   pci: number | null;
   discussedMDT: boolean;
