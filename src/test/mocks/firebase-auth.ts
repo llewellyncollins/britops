@@ -6,6 +6,7 @@ export const mockSignInEmail = vi.fn().mockResolvedValue({ user: null });
 export const mockSignUpEmail = vi.fn().mockResolvedValue({ user: null });
 export const mockSignInGoogle = vi.fn().mockResolvedValue({ user: null });
 export const mockSignOut = vi.fn().mockResolvedValue(undefined);
+export const mockDeleteAccount = vi.fn().mockResolvedValue(undefined);
 export const mockOnAuthChange = vi.fn((cb: (user: unknown) => void) => {
   authChangeCallback = cb;
   // Call with null initially (no user signed in)
@@ -37,6 +38,7 @@ export function setupAuthMock() {
     signUpEmail: mockSignUpEmail,
     signInGoogle: mockSignInGoogle,
     signOut: mockSignOut,
+    deleteAccount: mockDeleteAccount,
     onAuthChange: mockOnAuthChange,
   };
 }
