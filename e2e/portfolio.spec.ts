@@ -22,7 +22,7 @@ test.describe('Portfolio', () => {
     await page.getByText('Laparoscopic cholecystectomy').first().click();
     // Close the procedure picker dropdown
     await page.getByRole('heading', { name: 'Log Operation' }).click();
-    await page.getByRole('button', { name: 'Surgeon independent' }).click();
+    await page.getByRole('radio', { name: 'Surgeon independent' }).click();
     await page.getByRole('button', { name: 'Save Operation' }).click();
 
     // Navigate to Portfolio

@@ -30,7 +30,7 @@ test.describe('Log Operation', () => {
     await page.getByRole('heading', { name: 'Log Operation' }).click();
 
     // Select involvement level
-    await page.getByRole('button', { name: 'Surgeon independent' }).click();
+    await page.getByRole('radio', { name: 'Surgeon independent' }).click();
 
     // Submit the form
     await page.getByRole('button', { name: 'Save Operation' }).click();
