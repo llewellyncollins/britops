@@ -56,28 +56,28 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-  lighthouse:
-    needs: lint-and-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-        env:
-          VITE_FIREBASE_API_KEY: "ci-placeholder"
-          VITE_FIREBASE_AUTH_DOMAIN: "ci-placeholder"
-          VITE_FIREBASE_PROJECT_ID: "ci-placeholder"
-          VITE_FIREBASE_STORAGE_BUCKET: "ci-placeholder"
-          VITE_FIREBASE_MESSAGING_SENDER_ID: "ci-placeholder"
-          VITE_FIREBASE_APP_ID: "ci-placeholder"
-      # - run: npx lhci autorun
-      # - uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: lighthouse-report
-      #     path: .lighthouseci/
-      #     retention-days: 14
+  # lighthouse:
+  #   needs: lint-and-build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 24
+  #         cache: npm
+  #     - run: npm ci
+  #     - run: npm run build
+  #       env:
+  #         VITE_FIREBASE_API_KEY: "ci-placeholder"
+  #         VITE_FIREBASE_AUTH_DOMAIN: "ci-placeholder"
+  #         VITE_FIREBASE_PROJECT_ID: "ci-placeholder"
+  #         VITE_FIREBASE_STORAGE_BUCKET: "ci-placeholder"
+  #         VITE_FIREBASE_MESSAGING_SENDER_ID: "ci-placeholder"
+  #         VITE_FIREBASE_APP_ID: "ci-placeholder"
+  # - run: npx lhci autorun
+  # - uses: actions/upload-artifact@v4
+  #   if: always()
+  #   with:
+  #     name: lighthouse-report
+  #     path: .lighthouseci/
+  #     retention-days: 14

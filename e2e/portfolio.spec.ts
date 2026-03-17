@@ -30,6 +30,6 @@ test.describe('Portfolio', () => {
 
     // Should see the procedure in the table
     await expect(page.getByText('Laparoscopic cholecystectomy')).toBeVisible();
-    await expect(page.getByRole('cell', { name: 'General Surgery' })).toBeVisible();
+    await expect(page.getByRole('rowheader', { name: 'General Surgery' })).toBeVisible();
   });
 });
