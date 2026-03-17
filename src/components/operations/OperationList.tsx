@@ -34,9 +34,10 @@ export function OperationList({ operations }: Props) {
   return (
     <div className="space-y-3">
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-3 text-text-muted" />
+        <Search aria-hidden="true" size={16} className="absolute left-3 top-3 text-text-muted" />
         <input
           type="text"
+          aria-label="Search operations"
           placeholder="Search operations..."
           value={search}
           onChange={e => setSearch(e.target.value)}

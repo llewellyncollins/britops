@@ -37,13 +37,18 @@ export function OperationCard({ operation, procedures, onClick }: Props) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Calendar size={14} className="text-text-muted shrink-0" />
+            <Calendar aria-hidden="true" size={14} className="text-text-muted shrink-0" />
             <span className="text-sm text-text-muted">
               {new Date(operation.date).toLocaleDateString('en-GB', {
                 day: 'numeric', month: 'short', year: 'numeric',
               })}
             </span>
-            {hasComplications && <AlertTriangle size={14} className="text-warning shrink-0" />}
+            {hasComplications && (
+              <>
+                <AlertTriangle aria-hidden="true" size={14} className="text-warning shrink-0" />
+                <span className="sr-only">Has intraoperative complications</span>
+              </>
+            )}
           </div>
           <p className="font-semibold text-sm truncate">
             {procedureNames.join(', ') || 'No procedures'}
@@ -58,7 +63,7 @@ export function OperationCard({ operation, procedures, onClick }: Props) {
       </div>
       {operation.patientId && (
         <div className="flex items-center gap-1 mt-2 text-xs text-text-muted">
-          <User size={12} />
+          <User aria-hidden="true" size={12} />
           <span>{operation.patientId}</span>
         </div>
       )}

@@ -17,20 +17,23 @@ export function OfflineIndicator() {
     };
   }, []);
 
-  if (!online) {
-    return (
-      <div className="flex items-center gap-1.5 text-sm">
-        <WifiOff size={16} className="text-yellow-300" />
-        <span className="text-yellow-200 text-xs">Offline</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex items-center gap-1.5 text-sm">
-      <Wifi size={16} className="text-green-300" />
-      {syncing && (
-        <RefreshCw size={13} className="text-green-300 animate-spin" />
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label={!online ? 'Offline' : syncing ? 'Syncing' : 'Online'}
+      className="flex items-center gap-1.5 text-sm"
+    >
+      {!online ? (
+        <>
+          <WifiOff aria-hidden="true" size={16} className="text-yellow-300" />
+          <span className="text-yellow-200 text-xs">Offline</span>
+        </>
+      ) : (
+        <>
+          <Wifi aria-hidden="true" size={16} className="text-green-300" />
+          {syncing && <RefreshCw aria-hidden="true" size={13} className="text-green-300 animate-spin" />}
+        </>
       )}
     </div>
   );

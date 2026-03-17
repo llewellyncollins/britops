@@ -11,11 +11,12 @@ const NAV_ITEMS = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface-raised border-t border-border flex justify-around py-2 z-50">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 bg-surface-raised border-t border-border flex justify-around py-2 z-50">
       {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
         <NavLink
           key={to}
           to={to}
+          end={to === '/'}
           className={({ isActive }) =>
             cn(
               'flex flex-col items-center gap-0.5 px-3 py-1 text-xs rounded-lg transition-colors',
@@ -23,7 +24,7 @@ export function BottomNav() {
             )
           }
         >
-          <Icon size={22} />
+          <Icon aria-hidden="true" size={22} />
           {label}
         </NavLink>
       ))}

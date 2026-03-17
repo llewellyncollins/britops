@@ -125,10 +125,11 @@ export function ProcedureTypeManager() {
 
           {/* Specialty */}
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-specialty" className="block text-xs font-medium text-text-muted mb-1">
               Specialty *
             </label>
             <select
+              id="new-proc-specialty"
               value={form.specialty}
               onChange={(e) =>
                 setForm((f) => ({
@@ -157,16 +158,18 @@ export function ProcedureTypeManager() {
                   setForm((f) => ({ ...f, customSpecialty: e.target.value }))
                 }
                 className="input text-sm mt-2"
+                aria-label="Custom specialty name"
               />
             )}
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-category" className="block text-xs font-medium text-text-muted mb-1">
               Category (type) *
             </label>
             <select
+              id="new-proc-category"
               value={form.category}
               onChange={(e) =>
                 setForm((f) => ({
@@ -195,16 +198,18 @@ export function ProcedureTypeManager() {
                   setForm((f) => ({ ...f, customCategory: e.target.value }))
                 }
                 className="input text-sm mt-2"
+                aria-label="Custom category name"
               />
             )}
           </div>
 
           {/* Subcategory */}
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-subcategory" className="block text-xs font-medium text-text-muted mb-1">
               Subtype <span className="font-normal">(optional)</span>
             </label>
             <input
+              id="new-proc-subcategory"
               type="text"
               placeholder="e.g., Laparoscopic, Open, Robotic"
               value={form.subcategory}
@@ -217,10 +222,11 @@ export function ProcedureTypeManager() {
 
           {/* Name */}
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-name" className="block text-xs font-medium text-text-muted mb-1">
               Procedure name *
             </label>
             <input
+              id="new-proc-name"
               type="text"
               placeholder="e.g., Whipple procedure"
               value={form.name}
@@ -265,6 +271,8 @@ export function ProcedureTypeManager() {
             >
               <button
                 onClick={() => toggleSpecialty(sp)}
+                aria-expanded={expandedSpecialties.has(sp)}
+                aria-controls={`custom-sp-${sp}`}
                 className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 text-sm font-semibold"
               >
                 <span>
@@ -280,7 +288,7 @@ export function ProcedureTypeManager() {
                 )}
               </button>
               {expandedSpecialties.has(sp) && (
-                <div className="divide-y divide-border">
+                <div id={`custom-sp-${sp}`} className="divide-y divide-border">
                   {customBySpecialty[sp].map((p) => (
                     <div
                       key={p.id}
@@ -300,9 +308,9 @@ export function ProcedureTypeManager() {
                       <button
                         onClick={() => removeProcedureType(p.id)}
                         className="text-text-muted hover:text-danger p-1 rounded transition-colors"
-                        title="Remove"
+                        aria-label={`Remove ${p.name}`}
                       >
-                        <Trash2 size={14} />
+                        <Trash2 aria-hidden="true" size={14} />
                       </button>
                     </div>
                   ))}
@@ -325,6 +333,8 @@ export function ProcedureTypeManager() {
           >
             <button
               onClick={() => toggleSpecialty(`default_${sp}`)}
+              aria-expanded={expandedSpecialties.has(`default_${sp}`)}
+              aria-controls={`default-sp-${sp}`}
               className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 text-sm"
             >
               <span className="font-medium">{sp}</span>
@@ -338,7 +348,7 @@ export function ProcedureTypeManager() {
               </span>
             </button>
             {expandedSpecialties.has(`default_${sp}`) && (
-              <div className="divide-y divide-border max-h-48 overflow-y-auto">
+              <div id={`default-sp-${sp}`} className="divide-y divide-border max-h-48 overflow-y-auto">
                 {defaultBySpecialty[sp].map((p) => (
                   <div
                     key={p.id}

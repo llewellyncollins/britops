@@ -26,13 +26,14 @@ export function PortfolioSummary({ rows, filterSpecialty }: Props) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
+        <caption className="sr-only">Procedure log — operations by specialty, category and involvement level</caption>
         <thead>
           <tr className="bg-primary text-white">
-            <th className="text-left px-3 py-2 font-semibold">Procedure</th>
-            <th className="px-3 py-2 font-semibold text-center w-16">Total</th>
-            <th className="px-3 py-2 font-semibold text-center w-16">Asst</th>
-            <th className="px-3 py-2 font-semibold text-center w-16">Supv</th>
-            <th className="px-3 py-2 font-semibold text-center w-16">Indep</th>
+            <th scope="col" className="text-left px-3 py-2 font-semibold">Procedure</th>
+            <th scope="col" className="px-3 py-2 font-semibold text-center w-16">Total</th>
+            <th scope="col" className="px-3 py-2 font-semibold text-center w-16"><abbr title="Assistant">Asst</abbr></th>
+            <th scope="col" className="px-3 py-2 font-semibold text-center w-16"><abbr title="Supervised">Supv</abbr></th>
+            <th scope="col" className="px-3 py-2 font-semibold text-center w-16"><abbr title="Independent">Indep</abbr></th>
           </tr>
         </thead>
         <tbody>
@@ -49,9 +50,9 @@ export function PortfolioSummary({ rows, filterSpecialty }: Props) {
               <Fragment key={specialty}>
                 {/* Specialty row */}
                 <tr className="bg-primary/10 border-t-2 border-primary/30">
-                  <td className="px-3 py-2 font-bold text-primary text-xs uppercase tracking-wide" colSpan={1}>
+                  <th scope="rowgroup" className="px-3 py-2 font-bold text-primary text-xs uppercase tracking-wide text-left">
                     {specialty}
-                  </td>
+                  </th>
                   <td className="px-3 py-2 text-center font-bold text-primary">{spTotal}</td>
                   <td className="px-3 py-2 text-center text-primary">{spAsst || '-'}</td>
                   <td className="px-3 py-2 text-center text-primary">{spSupv || '-'}</td>
@@ -69,7 +70,7 @@ export function PortfolioSummary({ rows, filterSpecialty }: Props) {
                     <Fragment key={cat}>
                       {/* Category sub-header */}
                       <tr className="bg-gray-100 font-semibold">
-                        <td className="px-3 py-1.5 pl-6 text-xs text-text-muted uppercase tracking-wide">{cat}</td>
+                        <th scope="row" className="px-3 py-1.5 pl-6 text-xs text-text-muted uppercase tracking-wide text-left">{cat}</th>
                         <td className="px-3 py-1.5 text-center text-xs">{catTotal || '-'}</td>
                         <td className="px-3 py-1.5 text-center text-xs">{catAsst || '-'}</td>
                         <td className="px-3 py-1.5 text-center text-xs">{catSupv || '-'}</td>

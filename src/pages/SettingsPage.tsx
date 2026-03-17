@@ -175,7 +175,7 @@ export function SettingsPage() {
       <section className="space-y-3">
         <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Your Specialty</h3>
         <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-          <GraduationCap size={20} className="text-primary" />
+          <GraduationCap aria-hidden="true" size={20} className="text-primary" />
           <div className="flex-1">
             <select
               value={specialty ?? ''}
@@ -200,28 +200,32 @@ export function SettingsPage() {
           <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Account</h3>
           {user ? (
             <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-              <User size={20} className="text-primary" />
+              <User aria-hidden="true" size={20} className="text-primary" />
               <div className="flex-1">
                 <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
                 <p className="text-xs text-text-muted">Syncing enabled</p>
               </div>
-              <button onClick={() => signOut()} className="text-sm text-danger hover:underline">
-                <LogOut size={16} />
+              <button onClick={() => signOut()} aria-label="Sign out" className="text-sm text-danger hover:underline">
+                <LogOut aria-hidden="true" size={16} />
               </button>
             </div>
           ) : (
             <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
               <button
                 onClick={() => setShowLogin(!showLogin)}
+                aria-expanded={showLogin}
+                aria-controls="settings-login-panel"
                 className="w-full flex items-center gap-3 p-3 hover:border-primary-light text-sm font-medium text-primary"
               >
-                <LogIn size={20} />
+                <LogIn aria-hidden="true" size={20} />
                 <span>Sign in to enable sync</span>
               </button>
               {showLogin && (
-                <div className="border-t border-border p-3 space-y-3">
+                <div id="settings-login-panel" className="border-t border-border p-3 space-y-3">
                   <form onSubmit={handleLogin} className="space-y-3">
+                    <label htmlFor="settings-login-email" className="sr-only">Email address</label>
                     <input
+                      id="settings-login-email"
                       type="email"
                       placeholder="Email"
                       value={loginEmail}
@@ -229,7 +233,9 @@ export function SettingsPage() {
                       required
                       className="input"
                     />
+                    <label htmlFor="settings-login-password" className="sr-only">Password</label>
                     <input
+                      id="settings-login-password"
                       type="password"
                       placeholder="Password"
                       value={loginPassword}
@@ -254,13 +260,13 @@ export function SettingsPage() {
                         </span>
                       </label>
                     )}
-                    {loginError && <p className="text-sm text-danger">{loginError}</p>}
+                    {loginError && <p role="alert" className="text-sm text-danger">{loginError}</p>}
                     <button
                       type="submit"
                       disabled={loginLoading || (isSignUp && !consentChecked)}
                       className="w-full bg-primary text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary-dark disabled:opacity-50"
                     >
-                      <LogIn size={16} />
+                      <LogIn aria-hidden="true" size={16} />
                       {loginLoading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
                     </button>
                   </form>
@@ -268,7 +274,7 @@ export function SettingsPage() {
                     onClick={handleGoogleSignIn}
                     className="w-full border border-border py-2 rounded-lg font-medium text-sm hover:bg-gray-50 flex items-center justify-center gap-2"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     Continue with Google
                   </button>
                   <p className="text-center text-xs text-text-muted">
@@ -288,19 +294,21 @@ export function SettingsPage() {
       <section className="space-y-3">
         <button
           onClick={() => setShowProcedures(!showProcedures)}
+          aria-expanded={showProcedures}
+          aria-controls="settings-procedures-panel"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Stethoscope size={20} className="text-primary" />
+          <Stethoscope aria-hidden="true" size={20} className="text-primary" />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Procedure Types</p>
             <p className="text-xs text-text-muted">
               Add custom procedures or browse {allProcedures.length} built-in entries
             </p>
           </div>
-          {showProcedures ? <ChevronDown size={16} className="text-text-muted" /> : <ChevronRight size={16} className="text-text-muted" />}
+          {showProcedures ? <ChevronDown aria-hidden="true" size={16} className="text-text-muted" /> : <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />}
         </button>
         {showProcedures && (
-          <div className="border border-border rounded-lg p-4">
+          <div id="settings-procedures-panel" className="border border-border rounded-lg p-4">
             <ProcedureTypeManager />
           </div>
         )}
@@ -314,7 +322,7 @@ export function SettingsPage() {
           onClick={exportXlsx}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <FileSpreadsheet size={20} className="text-primary" />
+          <FileSpreadsheet aria-hidden="true" size={20} className="text-primary" />
           <div className="text-left">
             <p className="font-medium text-sm">Export Portfolio (Excel)</p>
             <p className="text-xs text-text-muted">Download as .xlsx with summary + log</p>
@@ -325,7 +333,7 @@ export function SettingsPage() {
           onClick={exportCSV}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Download size={20} className="text-primary" />
+          <Download aria-hidden="true" size={20} className="text-primary" />
           <div className="text-left">
             <p className="font-medium text-sm">Export to CSV</p>
             <p className="text-xs text-text-muted">Download all operations as CSV</p>
@@ -337,7 +345,7 @@ export function SettingsPage() {
             onClick={() => exportAllDataJson(user.uid)}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
-            <FileJson size={20} className="text-primary" />
+            <FileJson aria-hidden="true" size={20} className="text-primary" />
             <div className="text-left">
               <p className="font-medium text-sm">Export All My Data (JSON)</p>
               <p className="text-xs text-text-muted">Complete data export for GDPR portability</p>
@@ -362,7 +370,7 @@ export function SettingsPage() {
           disabled={importing}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Upload size={20} className="text-primary" />
+          <Upload aria-hidden="true" size={20} className="text-primary" />
           <div className="text-left">
             <p className="font-medium text-sm">{importing ? 'Importing...' : 'Import from Excel'}</p>
             <p className="text-xs text-text-muted">Import operations from .xlsx logbook</p>
@@ -383,24 +391,24 @@ export function SettingsPage() {
           to="/privacy"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Shield size={20} className="text-primary" />
+          <Shield aria-hidden="true" size={20} className="text-primary" />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Privacy Policy</p>
             <p className="text-xs text-text-muted">How your data is collected, stored, and protected</p>
           </div>
-          <ExternalLink size={16} className="text-text-muted" />
+          <ExternalLink aria-hidden="true" size={16} className="text-text-muted" />
         </Link>
 
         <Link
           to="/terms"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <FileSpreadsheet size={20} className="text-primary" />
+          <FileSpreadsheet aria-hidden="true" size={20} className="text-primary" />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Terms of Service</p>
             <p className="text-xs text-text-muted">Usage terms and clinical disclaimer</p>
           </div>
-          <ExternalLink size={16} className="text-text-muted" />
+          <ExternalLink aria-hidden="true" size={16} className="text-text-muted" />
         </Link>
       </section>
 
@@ -411,7 +419,7 @@ export function SettingsPage() {
           onClick={clearData}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-red-200 rounded-lg hover:border-danger transition-colors"
         >
-          <Trash2 size={20} className="text-danger" />
+          <Trash2 aria-hidden="true" size={20} className="text-danger" />
           <div className="text-left">
             <p className="font-medium text-sm text-danger">Clear all operations</p>
             <p className="text-xs text-text-muted">Permanently delete all local operation data</p>
@@ -425,7 +433,7 @@ export function SettingsPage() {
               disabled={deleting}
               className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-red-200 rounded-lg hover:border-danger transition-colors"
             >
-              <AlertTriangle size={20} className="text-danger" />
+              <AlertTriangle aria-hidden="true" size={20} className="text-danger" />
               <div className="text-left">
                 <p className="font-medium text-sm text-danger">
                   {deleting ? 'Deleting...' : deleteConfirmStep === 0 ? 'Delete Account & All Data' : 'Confirm: Delete Everything'}

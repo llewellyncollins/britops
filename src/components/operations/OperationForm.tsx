@@ -41,8 +41,10 @@ function SpecialtySelector({ specialty, onChange }: { specialty: string | null; 
 
   return (
     <div className="flex items-center gap-2 p-2 bg-surface-raised border border-border rounded-lg">
-      <GraduationCap size={16} className="text-primary shrink-0" />
+      <GraduationCap aria-hidden="true" size={16} className="text-primary shrink-0" />
+      <label htmlFor="specialty-select" className="sr-only">Specialty</label>
       <select
+        id="specialty-select"
         value={specialty ?? ''}
         onChange={e => onChange(e.target.value || null)}
         className="flex-1 text-sm bg-transparent border-none focus:ring-0 cursor-pointer"
@@ -105,7 +107,7 @@ function OperationFormInner({ specialty, existing }: { specialty: string | null;
         disabled={isSubmitting || !isValid}
         className="w-full bg-primary text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-dark disabled:opacity-50 transition-colors"
       >
-        <Save size={18} />
+        <Save aria-hidden="true" size={18} />
         {isSubmitting ? 'Saving...' : existing ? 'Update Operation' : 'Save Operation'}
       </button>
     </form>

@@ -8,17 +8,26 @@ interface Props {
   procedures: ProcedureType[];
 }
 
+const TRIGGER_ID = 'procedure-picker-trigger';
+
 export function ProcedurePicker({ selected, onChange, procedures }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
+    function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const q = search.toLowerCase().trim();
@@ -55,12 +64,18 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
 
   return (
     <div ref={ref} className="relative">
-      <label className="block text-sm font-medium text-text-muted mb-1">Procedures</label>
+      <label htmlFor={TRIGGER_ID} className="block text-sm font-medium text-text-muted mb-1">
+        Procedures
+      </label>
 
       {/* Selected chips + open trigger */}
-      <div
-        className="min-h-[42px] border border-border rounded-lg px-3 py-2 bg-white cursor-pointer flex flex-wrap gap-1.5 items-center"
-        onClick={() => { setOpen(!open); }}
+      <button
+        id={TRIGGER_ID}
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        onClick={() => setOpen(!open)}
+        className="min-h-[42px] w-full border border-border rounded-lg px-3 py-2 bg-white cursor-pointer flex flex-wrap gap-1.5 items-center text-left"
       >
         {selectedProcs.length === 0 && (
           <span className="text-text-muted text-sm flex-1">Select procedures...</span>
@@ -71,27 +86,35 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
             {p.subcategory && <span className="opacity-70">({p.subcategory})</span>}
             <button
               type="button"
+              aria-label={`Remove ${p.name}`}
               onClick={e => { e.stopPropagation(); toggle(p.id); }}
               className="hover:text-danger ml-0.5"
             >
-              <X size={12} />
+              <X aria-hidden="true" size={12} />
             </button>
           </span>
         ))}
         <ChevronDown
+          aria-hidden="true"
           size={16}
           className={`ml-auto text-text-muted shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
         />
-      </div>
+      </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto">
+        <div
+          role="listbox"
+          aria-label="Procedures"
+          aria-multiselectable="true"
+          className="absolute z-50 mt-1 w-full bg-white border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto"
+        >
           {/* Search bar */}
           <div className="sticky top-0 bg-white p-2 border-b border-border">
             <div className="relative">
-              <Search size={15} className="absolute left-2.5 top-2.5 text-text-muted" />
+              <Search aria-hidden="true" size={15} className="absolute left-2.5 top-2.5 text-text-muted" />
               <input
                 type="text"
+                aria-label="Search procedures"
                 placeholder="Search by name, specialty or category..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -108,14 +131,14 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
           {grouped.map(({ specialty, categories }) => (
             <div key={specialty}>
               {/* Specialty header */}
-              <div className="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider sticky top-[52px]">
+              <div aria-hidden="true" className="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider sticky top-[52px]">
                 {specialty}
               </div>
 
               {categories.map(({ category, items }) => (
                 <div key={category}>
                   {/* Category sub-header */}
-                  <div className="px-4 py-1 bg-gray-50 text-xs font-semibold text-text-muted uppercase tracking-wide">
+                  <div aria-hidden="true" className="px-4 py-1 bg-gray-50 text-xs font-semibold text-text-muted uppercase tracking-wide">
                     {category}
                   </div>
 
@@ -123,6 +146,8 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                     <button
                       key={p.id}
                       type="button"
+                      role="option"
+                      aria-selected={selected.includes(p.id)}
                       onClick={() => toggle(p.id)}
                       className={`w-full text-left px-5 py-2 text-sm hover:bg-blue-50 flex items-center justify-between gap-2 ${
                         selected.includes(p.id) ? 'bg-blue-50 text-primary font-medium' : ''
@@ -135,7 +160,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                         )}
                       </span>
                       {selected.includes(p.id) && (
-                        <span className="text-primary shrink-0">✓</span>
+                        <span aria-hidden="true" className="text-primary shrink-0">✓</span>
                       )}
                     </button>
                   ))}

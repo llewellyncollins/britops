@@ -86,12 +86,14 @@ function FieldRenderer({
         name={field.key}
         control={control}
         render={({ field: f }) => (
-          <FieldWrapper label={field.label} required={field.required}>
-            <div className="flex gap-2">
+          <FieldWrapper label={field.label} required={field.required} fieldId={field.key}>
+            <div role="radiogroup" aria-label={field.label} className="flex gap-2">
               {field.options?.map(opt => (
                 <button
                   key={opt.value}
                   type="button"
+                  role="radio"
+                  aria-checked={f.value === opt.value}
                   onClick={() => f.onChange(opt.value)}
                   className={`flex-1 py-2 px-3 text-sm rounded-lg border transition-colors ${
                     f.value === opt.value
@@ -117,6 +119,7 @@ function FieldRenderer({
         render={({ field: f }) => (
           <label className="flex items-center gap-2 cursor-pointer">
             <input
+              id={field.key}
               type="checkbox"
               checked={f.value ?? false}
               onChange={e => f.onChange(e.target.checked)}
@@ -135,10 +138,12 @@ function FieldRenderer({
         name={field.key}
         control={control}
         render={({ field: f }) => (
-          <FieldWrapper label={field.label} required={field.required}>
+          <FieldWrapper label={field.label} required={field.required} fieldId={field.key}>
             <textarea
+              id={field.key}
               value={f.value ?? ''}
               onChange={f.onChange}
+              aria-required={field.required ?? false}
               className="input min-h-[60px]"
               placeholder={field.placeholder}
             />
@@ -154,13 +159,15 @@ function FieldRenderer({
         name={field.key}
         control={control}
         render={({ field: f }) => (
-          <FieldWrapper label={field.label} required={field.required}>
+          <FieldWrapper label={field.label} required={field.required} fieldId={field.key}>
             <input
+              id={field.key}
               type="number"
               min={field.min}
               max={field.max}
               value={f.value ?? ''}
               onChange={e => f.onChange(e.target.value ? Number(e.target.value) : null)}
+              aria-required={field.required ?? false}
               className="input"
             />
           </FieldWrapper>
@@ -175,12 +182,14 @@ function FieldRenderer({
       name={field.key}
       control={control}
       render={({ field: f }) => (
-        <FieldWrapper label={field.label} required={field.required}>
+        <FieldWrapper label={field.label} required={field.required} fieldId={field.key}>
           <input
+            id={field.key}
             type={field.type === 'date' ? 'date' : 'text'}
             value={f.value ?? ''}
             onChange={f.onChange}
             required={field.required}
+            aria-required={field.required ?? false}
             className="input"
             placeholder={field.placeholder}
           />
@@ -190,11 +199,22 @@ function FieldRenderer({
   );
 }
 
-function FieldWrapper({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function FieldWrapper({
+  label,
+  required,
+  fieldId,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  fieldId: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <label className="block text-sm font-medium text-text-muted mb-1">
-        {label}{required && <span className="text-danger ml-0.5">*</span>}
+      <label htmlFor={fieldId} className="block text-sm font-medium text-text-muted mb-1">
+        {label}
+        {required && <span aria-hidden="true" className="text-danger ml-0.5">*</span>}
       </label>
       {children}
     </div>

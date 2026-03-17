@@ -27,15 +27,19 @@ export function Portfolio() {
 
       {/* Date range filter */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <Calendar size={16} className="text-text-muted shrink-0" />
+        <Calendar aria-hidden="true" size={16} className="text-text-muted shrink-0" />
+        <label htmlFor="date-from" className="sr-only">From date</label>
         <input
+          id="date-from"
           type="date"
           value={dateFrom}
           onChange={e => setDateFrom(e.target.value)}
           className="input !w-auto text-sm"
         />
         <span className="text-text-muted text-sm shrink-0">to</span>
+        <label htmlFor="date-to" className="sr-only">To date</label>
         <input
+          id="date-to"
           type="date"
           value={dateTo}
           onChange={e => setDateTo(e.target.value)}
@@ -45,16 +49,19 @@ export function Portfolio() {
           <button
             onClick={() => { setDateFrom(''); setDateTo(''); }}
             className="text-xs text-primary hover:underline shrink-0"
+            aria-label="Clear date filters"
           >
             Clear
           </button>
         )}
-        <span className="text-sm text-text-muted ml-auto shrink-0">{totalOps} ops</span>
+        <span aria-label={`${totalOps} operations`} className="text-sm text-text-muted ml-auto shrink-0">{totalOps} ops</span>
       </div>
 
       {/* Specialty filter */}
       <div className="mb-4">
+        <label htmlFor="portfolio-specialty" className="sr-only">Filter by specialty</label>
         <select
+          id="portfolio-specialty"
           value={filterSpecialty}
           onChange={e => setFilterSpecialty(e.target.value)}
           className="input text-sm"
