@@ -5,10 +5,10 @@ Surgical operation logbook PWA for UK doctors building ARCP portfolios. Offline-
 ## Tech Stack
 
 - **Frontend:** React 19, TypeScript 5.8, Vite 6.3, Tailwind CSS 4
-- **State:** Zustand (global), Dexie/IndexedDB (local persistence)
+- **State:** Zustand (global + persist), Dexie/IndexedDB (local persistence)
 - **Backend:** Firebase Auth + Firestore (cloud sync)
 - **PWA:** vite-plugin-pwa with Workbox, auto-update service worker
-- **Testing:** Vitest + Testing Library (unit/integration), Playwright (E2E)
+- **Testing:** Vitest + Testing Library (unit/integration), Playwright (E2E), Lighthouse CI
 - **CI/CD:** GitHub Actions → Firebase Hosting (staging + production)
 
 ## Commands
@@ -23,6 +23,9 @@ npm run test:coverage # Vitest with v8 coverage
 npm run test:e2e     # Playwright E2E tests (all projects)
 npm run test:e2e:ui  # Playwright interactive UI mode
 npm run preview      # Preview production build locally
+npm run size         # Check bundle size limits
+npm run analyze      # Build with bundle visualizer (sets ANALYZE=true)
+npm run lhci         # Run Lighthouse CI
 ```
 
 ## Project Structure
@@ -30,22 +33,23 @@ npm run preview      # Preview production build locally
 ```
 src/
 ├── pages/              # Route pages: Dashboard, LogOperation, EditOperation,
-│                       #   Portfolio, SettingsPage, Login
+│                       #   Portfolio, SettingsPage, Login, PrivacyPolicy, TermsOfService
 ├── components/
 │   ├── layout/         # AppShell (auth wrapper + header), BottomNav
-│   ├── operations/     # OperationCard, OperationForm, OperationList, ProcedurePicker
+│   ├── operations/     # OperationCard, OperationForm, OperationList, ProcedurePicker, FormBuilder
 │   ├── portfolio/      # PortfolioSummary
 │   ├── settings/       # ProcedureTypeManager
 │   └── common/         # OfflineIndicator
 ├── hooks/              # useAuth, useOperations, usePortfolio, useProcedureTypes, useSync
+├── stores/             # useSettingsStore (Zustand persist store for user specialty)
 ├── context/            # SyncContext (syncing state for UI indicators)
 ├── firebase/           # config.ts, auth.ts, firestore.ts
 ├── db/                 # dexie.ts (IndexedDB schema, 2 versions)
 ├── types/              # TypeScript interfaces
-├── data/               # procedures.ts (213 default surgical procedures)
-├── utils/              # excel.ts (import/export), date parsing, procedure matching
+├── data/               # procedures.ts (187 default surgical procedures), formSchemas.ts (Zod)
+├── utils/              # excel.ts (import/export), export.ts (JSON export)
 ├── lib/                # cn() utility (clsx + tailwind-merge)
-├── test/               # setup.ts, factories.ts, mocks/ (Firebase mocks)
+├── test/               # setup.ts, factories.ts, render-with-providers.tsx, mocks/ (Firebase mocks)
 └── assets/             # Static images
 e2e/                    # Playwright E2E tests
 .github/workflows/      # CI/CD pipelines
@@ -63,7 +67,7 @@ User action → React component → useOperations hook → Dexie (IndexedDB)
 
 - **Local-first:** All reads/writes go to Dexie. Firestore syncs in background.
 - **Pre-login data:** Operations logged before sign-in use `userId: "local-user"`. On sign-in, `useSync` migrates them to the real UID.
-- **Soft deletes:** `deleted: boolean` flag on operations. Never hard-deleted.
+- **Soft deletes:** `deleted: boolean` flag + `deletedAt: string | null` timestamp on operations. Never hard-deleted locally; Firestore TTL policy purges 30 days after `deletedAt`.
 - **Last-write-wins:** Sync conflicts resolved by `updatedAt` timestamp.
 
 ### Database Schema (Dexie)
@@ -90,7 +94,7 @@ interface OperationEntry {
   intraOpComplications: string;
   postOpComplications: string;
   histology: string;
-  followUp: string;
+  followUp: boolean;
   complexityScore: number | null;
   pci: number | null;
   discussedMDT: boolean;
@@ -98,6 +102,7 @@ interface OperationEntry {
   createdAt: string;
   updatedAt: string;
   deleted: boolean;
+  deletedAt: string | null;
 }
 
 interface ProcedureType {
@@ -107,6 +112,17 @@ interface ProcedureType {
   subcategory?: string;
   specialty: string;
   isCustom: boolean;
+}
+
+interface ConsentRecord {
+  userId: string;
+  consentGiven: boolean;
+  consentTimestamp: string;
+  privacyPolicyVersion: string;
+}
+
+interface UserSettings {
+  specialty: string | null;
 }
 
 interface PortfolioRow {
@@ -126,6 +142,8 @@ interface PortfolioRow {
 
 ```
 /login    → Login (public)
+/privacy  → Privacy Policy (public)
+/terms    → Terms of Service (public)
 /         → Dashboard (protected)
 /log      → LogOperation form
 /edit/:id → EditOperation form
@@ -142,8 +160,24 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 | `useAuth()`                | Firebase auth state: `{ user, loading, isConfigured }`                                      |
 | `useOperations()`          | Dexie CRUD for operations: `{ operations, addOperation, updateOperation, deleteOperation }` |
 | `usePortfolio(ops, procs)` | Memoized aggregation of operations into PortfolioRow[]                                      |
-| `useProcedureTypes()`      | Merges 213 defaults with custom types. Supports hiding defaults via `__hidden__` prefix     |
+| `useProcedureTypes()`      | Merges 187 defaults with custom types. Supports hiding defaults via `__hidden__` prefix     |
 | `useSync(user)`            | Bidirectional Dexie ↔ Firestore sync with Dexie hooks and Firestore real-time listeners     |
+
+### Stores
+
+**`stores/useSettingsStore.ts`** — Zustand store with `persist` middleware. Stores `specialty: string | null` in localStorage (`britops-settings`). Synced to Firestore via `useSync`.
+
+### Firebase Modules
+
+- **auth.ts** — `signInEmail()`, `signUpEmail()`, `signInGoogle()`, `signOut()`, `deleteAccount()` (purges all Firestore data before deleting auth account), `onAuthChange()`
+- **firestore.ts** — push/subscribe/sync for operations, procedureTypes, and user settings; `migrateLocalOps()` for pre-login data; `saveConsentRecord()` (GDPR consent tracking); `purgeAllUserData()` (GDPR right to erasure)
+
+### GDPR & Compliance
+
+- Consent recorded in Firestore (`consentTimestamp`, `privacyPolicyVersion`) on first sign-up
+- `purgeAllUserData()` deletes all operations, custom procedure types, settings, and consent records
+- `deleteAccount()` calls `purgeAllUserData()` before removing the Firebase Auth account
+- `/privacy` and `/terms` pages are publicly accessible (no auth required)
 
 ## Deployment Pipeline
 
@@ -157,7 +191,7 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 ### Flow
 
 ```
-Feature branch → PR to main → CI runs (lint, build, unit tests, e2e tests)
+Feature branch → PR to main → CI runs (lint, build, unit tests, e2e tests, size, lighthouse)
                              → Preview channel deployed (unique URL on PR comment)
 Merge to main              → Auto-deploy to staging
 Merge main → production    → Deploy to production (requires GitHub environment approval)
@@ -165,12 +199,12 @@ Merge main → production    → Deploy to production (requires GitHub environme
 
 ### GitHub Actions Workflows
 
-| Workflow                | Trigger                             | Jobs                                                         |
-| ----------------------- | ----------------------------------- | ------------------------------------------------------------ |
-| `ci.yml`                | Push to main/production, PR to main | lint-and-build, unit-and-integration-tests, e2e-tests        |
-| `deploy-staging.yml`    | CI passes on main                   | Build with STAGING secrets → Firebase deploy                 |
-| `deploy-production.yml` | CI passes on production             | Build with PROD secrets → Firebase deploy (environment gate) |
-| `preview.yml`           | CI passes on PR                     | Build → Firebase preview channel                             |
+| Workflow                | Trigger                             | Jobs                                                                        |
+| ----------------------- | ----------------------------------- | --------------------------------------------------------------------------- |
+| `ci.yml`                | Push to main/production, PR to main | lint-and-build (+ size check), unit-and-integration-tests, e2e-tests, lighthouse |
+| `deploy-staging.yml`    | CI passes on main                   | Build with STAGING secrets → Firebase deploy                                |
+| `deploy-production.yml` | CI passes on production             | Build with PROD secrets → Firebase deploy (environment gate)                |
+| `preview.yml`           | CI passes on PR                     | Build → Firebase preview channel                                            |
 
 ### Required GitHub Secrets
 
@@ -185,9 +219,11 @@ Husky runs `npm run lint`, `npm run build`, and `npm test` before every `git pus
 ### Unit & Integration (Vitest)
 
 - Environment: happy-dom + fake-indexeddb
+- Coverage thresholds: 60% statements, branches, functions, lines
 - Mocks: Firebase auth/firestore in `src/test/mocks/`
 - Factories: `src/test/factories.ts` for test data
 - Setup: `src/test/setup.ts` (auto-loaded)
+- Helper: `src/test/render-with-providers.tsx`
 
 ### E2E (Playwright)
 
@@ -216,5 +252,6 @@ VITE_FIREBASE_APP_ID
 - Strict TypeScript (`noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`)
 - ESLint with `react-hooks` and `react-refresh` rules
 - Tailwind utility classes with `cn()` helper (clsx + tailwind-merge)
+- Form validation via Zod schemas in `src/data/formSchemas.ts` + react-hook-form
 - Vite code splitting: separate chunks for `firebase`, `xlsx`, and `vendor` (React/Router/Dexie/Zustand)
 - PWA: `index.html`, `sw.js`, `manifest.webmanifest` always served with `no-cache`; hashed assets with `immutable` cache
