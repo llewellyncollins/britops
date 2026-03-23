@@ -6,6 +6,7 @@ import { usePortfolio } from '../hooks/usePortfolio';
 import { useProcedureTypes } from '../hooks/useProcedureTypes';
 import { useAuth } from '../hooks/useAuth';
 import { useSettingsStore } from '../stores/useSettingsStore';
+import { TRAINEE_GRADES } from '../data/grades';
 import { exportPortfolioXlsx, importFromXlsx } from '../utils/excel';
 import { exportAllDataJson } from '../utils/export';
 import { signOut, signInEmail, signUpEmail, signInGoogle, deleteAccount } from '../firebase/auth';
@@ -20,7 +21,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const { operations, addOperation } = useOperations();
   const { allProcedures, specialties } = useProcedureTypes();
-  const { specialty, setSpecialty } = useSettingsStore();
+  const { specialty, setSpecialty, grade, setGrade } = useSettingsStore();
   const portfolioRows = usePortfolio(operations, allProcedures);
   const { user, isConfigured } = useAuth();
   const [importing, setImporting] = useState(false);
@@ -170,6 +171,31 @@ export function SettingsPage() {
   return (
     <div className="p-4 max-w-lg mx-auto space-y-6">
       <h2 className="text-xl font-bold">Settings</h2>
+
+      {/* Clinical Profile */}
+      <section className="space-y-3">
+        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Clinical Profile</h3>
+        <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
+          <div className="flex items-start gap-3">
+            <Stethoscope aria-hidden="true" size={20} className="text-primary mt-2 shrink-0" />
+            <div className="flex-1 space-y-3">
+              <div>
+                <label htmlFor="settings-grade" className="block text-sm font-medium text-text-muted mb-1">Trainee grade</label>
+                <select
+                  id="settings-grade"
+                  value={grade ?? ''}
+                  onChange={e => setGrade(e.target.value || null)}
+                  className="input"
+                >
+                  <option value="">Not set</option>
+                  {TRAINEE_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <p className="text-xs text-text-muted">Pre-fills grade on each new operation you log</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Specialty */}
       <section className="space-y-3">

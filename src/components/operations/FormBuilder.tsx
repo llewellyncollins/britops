@@ -80,6 +80,31 @@ function FieldRenderer({
     );
   }
 
+  if (field.type === 'select' && field.key !== 'involvement') {
+    return (
+      <Controller
+        name={field.key}
+        control={control}
+        render={({ field: f }) => (
+          <FieldWrapper label={field.label} required={field.required} fieldId={field.key}>
+            <select
+              id={field.key}
+              value={f.value ?? ''}
+              onChange={e => f.onChange(e.target.value)}
+              aria-required={field.required ?? false}
+              className="input"
+            >
+              <option value="">Select {field.label.toLowerCase()}</option>
+              {field.options?.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </FieldWrapper>
+        )}
+      />
+    );
+  }
+
   if (field.type === 'select' && field.key === 'involvement') {
     return (
       <Controller
@@ -170,6 +195,36 @@ function FieldRenderer({
               aria-required={field.required ?? false}
               className="input"
             />
+          </FieldWrapper>
+        )}
+      />
+    );
+  }
+
+  if (field.type === 'combobox') {
+    const listId = `${field.key}-list`;
+    return (
+      <Controller
+        name={field.key}
+        control={control}
+        render={({ field: f }) => (
+          <FieldWrapper label={field.label} required={field.required} fieldId={field.key}>
+            <input
+              id={field.key}
+              type="text"
+              list={listId}
+              value={f.value ?? ''}
+              onChange={f.onChange}
+              aria-required={field.required ?? false}
+              className="input"
+              placeholder={field.placeholder}
+              autoComplete="off"
+            />
+            <datalist id={listId}>
+              {field.suggestions?.map(s => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
           </FieldWrapper>
         )}
       />

@@ -97,6 +97,7 @@ describe('formSchemas', () => {
       const schema = getSchemaForSpecialty(null);
       const valid = schema.safeParse({
         date: '2025-03-15',
+        grade: '',
         patientId: '',
         diagnosis: '',
         procedures: ['gs_lap_chole'],
@@ -139,6 +140,7 @@ describe('formSchemas', () => {
       const schema = getSchemaForSpecialty('Orthopaedics');
       const result = schema.safeParse({
         date: '2025-03-15',
+        grade: '',
         patientId: '',
         diagnosis: '',
         procedures: ['ortho_thr'],

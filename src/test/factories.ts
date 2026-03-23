@@ -9,6 +9,8 @@ export function createOperation(
     id: uuidv4(),
     userId: 'test-user',
     date: '2025-03-15',
+    hospital: '',
+    grade: '',
     patientId: 'PT001',
     chemotherapy: '',
     diagnosis: 'Gallstone disease',

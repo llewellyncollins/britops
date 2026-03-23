@@ -41,12 +41,13 @@ src/
 │   ├── settings/       # ProcedureTypeManager
 │   └── common/         # OfflineIndicator
 ├── hooks/              # useAuth, useOperations, usePortfolio, useProcedureTypes, useSync
-├── stores/             # useSettingsStore (Zustand persist store for user specialty)
+├── stores/             # useSettingsStore (Zustand persist store for specialty, hospital, grade)
 ├── context/            # SyncContext (syncing state for UI indicators)
 ├── firebase/           # config.ts, auth.ts, firestore.ts
 ├── db/                 # dexie.ts (IndexedDB schema, 2 versions)
 ├── types/              # TypeScript interfaces
-├── data/               # procedures.ts (187 default surgical procedures), formSchemas.ts (Zod)
+├── data/               # procedures.ts (187 default surgical procedures), formSchemas.ts (Zod),
+│                       #   hospitals.ts (UK NHS hospitals list), grades.ts (UK trainee grades)
 ├── utils/              # excel.ts (import/export), export.ts (JSON export)
 ├── lib/                # cn() utility (clsx + tailwind-merge)
 ├── test/               # setup.ts, factories.ts, render-with-providers.tsx, mocks/ (Firebase mocks)
@@ -85,6 +86,8 @@ interface OperationEntry {
   id: string;
   userId: string;
   date: string;
+  hospital: string;
+  grade: string;
   patientId: string;
   chemotherapy: string;
   diagnosis: string;
@@ -123,6 +126,8 @@ interface ConsentRecord {
 
 interface UserSettings {
   specialty: string | null;
+  hospital: string | null;
+  grade: string | null;
 }
 
 interface PortfolioRow {

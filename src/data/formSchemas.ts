@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { TRAINEE_GRADES } from './grades';
 
 // ─── Field metadata for form rendering ───────────────────────────────────────
 
-export type FieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'textarea' | 'procedures';
+export type FieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'textarea' | 'procedures' | 'combobox';
 
 export interface FieldMeta {
   key: string;
@@ -13,6 +14,7 @@ export interface FieldMeta {
   min?: number;
   max?: number;
   options?: { value: string; label: string }[];
+  suggestions?: string[];
   colSpan?: 1 | 2;
 }
 
@@ -21,6 +23,7 @@ export interface FieldMeta {
 const BASE_FIELDS: FieldMeta[] = [
   { key: 'date', label: 'Date', type: 'date', required: true, colSpan: 1 },
   { key: 'patientId', label: 'Patient ID', type: 'text', placeholder: 'Hospital number', colSpan: 1 },
+  { key: 'grade', label: 'Grade', type: 'select', colSpan: 2, options: TRAINEE_GRADES.map(g => ({ value: g, label: g })) },
   { key: 'diagnosis', label: 'Diagnosis', type: 'text', placeholder: 'e.g., Gr 2 EEC', colSpan: 2 },
   { key: 'procedures', label: 'Procedures', type: 'procedures', required: true, colSpan: 2 },
   {
@@ -109,6 +112,7 @@ export function getFieldsForSpecialty(specialty: string | null): FieldMeta[] {
 export const baseOperationSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   patientId: z.string(),
+  grade: z.string(),
   diagnosis: z.string(),
   procedures: z.array(z.string()).min(1, 'At least one procedure is required'),
   involvement: z.enum(['assistant', 'supervised', 'independent']),
@@ -145,6 +149,7 @@ export function getDefaultValues(specialty: string | null, existing?: Record<str
   const defaults: Record<string, unknown> = {
     date: new Date().toISOString().split('T')[0],
     patientId: '',
+    grade: '',
     diagnosis: '',
     procedures: [],
     involvement: 'assistant',

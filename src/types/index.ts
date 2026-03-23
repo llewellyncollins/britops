@@ -13,6 +13,8 @@ export interface OperationEntry {
   id: string;
   userId: string;
   date: string;
+  hospital: string;
+  grade: string;
   patientId: string;
   chemotherapy: string;
   diagnosis: string;

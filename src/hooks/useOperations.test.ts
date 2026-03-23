@@ -42,6 +42,8 @@ describe("useOperations", () => {
     await act(async () => {
       await result.current.addOperation({
         date: "2025-03-15",
+        hospital: "",
+        grade: "",
         patientId: "PT001",
         chemotherapy: "",
         diagnosis: "Test diagnosis",

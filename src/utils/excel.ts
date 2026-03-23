@@ -134,6 +134,8 @@ function parseRow(
 
   return {
     date,
+    hospital: String(row['Hospital'] ?? row['hospital'] ?? ''),
+    grade: String(row['Grade'] ?? row['grade'] ?? ''),
     patientId: String(row['Patient ID'] ?? row['Patient number'] ?? row['patient number'] ?? ''),
     chemotherapy: String(row['chemo'] ?? row['Chemo'] ?? ''),
     diagnosis: String(row['Diagnosis'] ?? row['diagnosis'] ?? ''),

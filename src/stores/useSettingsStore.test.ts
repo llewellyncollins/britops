@@ -4,7 +4,7 @@ import { useSettingsStore } from './useSettingsStore';
 describe('useSettingsStore', () => {
   beforeEach(() => {
     // Reset store state between tests
-    useSettingsStore.setState({ specialty: null });
+    useSettingsStore.setState({ specialty: null, grade: null });
   });
 
   it('has null specialty initially', () => {
@@ -23,7 +23,8 @@ describe('useSettingsStore', () => {
   });
 
   it('setSettings updates all settings', () => {
-    useSettingsStore.getState().setSettings({ specialty: 'Urology' });
+    useSettingsStore.getState().setSettings({ specialty: 'Urology', grade: 'ST5' });
     expect(useSettingsStore.getState().specialty).toBe('Urology');
+    expect(useSettingsStore.getState().grade).toBe('ST5');
   });
 });

@@ -119,13 +119,13 @@ export function useSync(user: User | null) {
     if (!user || !isConfigured) return;
 
     const unsub = useSettingsStore.subscribe((state) => {
-      const { specialty } = state;
-      pushUserSettingsToFirestore(user.uid, { specialty }).catch(console.error);
+      const { specialty, grade } = state;
+      pushUserSettingsToFirestore(user.uid, { specialty, grade }).catch(console.error);
     });
 
     // Push current settings on first sign-in
-    const { specialty } = useSettingsStore.getState();
-    pushUserSettingsToFirestore(user.uid, { specialty }).catch(console.error);
+    const { specialty, grade } = useSettingsStore.getState();
+    pushUserSettingsToFirestore(user.uid, { specialty, grade }).catch(console.error);
 
     return unsub;
   }, [user]);

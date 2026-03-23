@@ -61,6 +61,7 @@ function SpecialtySelector({ specialty, onChange }: { specialty: string | null; 
 function OperationFormInner({ specialty, existing }: { specialty: string | null; existing?: OperationEntry }) {
   const navigate = useNavigate();
   const { addOperation, updateOperation } = useOperations();
+  const grade = useSettingsStore(s => s.grade);
 
   // Get base fields for this specialty
   let fields = getFieldsForSpecialty(specialty);
@@ -81,7 +82,12 @@ function OperationFormInner({ specialty, existing }: { specialty: string | null;
     }
   }
 
-  const defaultValues = getDefaultValues(specialty, existing as unknown as Record<string, unknown>);
+  // Pre-fill grade from settings for new operations
+  const settingsDefaults = existing ? {} : { grade: grade ?? '' };
+  const defaultValues = getDefaultValues(specialty, {
+    ...settingsDefaults,
+    ...(existing as unknown as Record<string, unknown>),
+  });
 
   const { control, handleSubmit, formState: { isSubmitting, isValid } } = useForm({
     resolver: zodResolver(schema),

@@ -18,6 +18,9 @@ test.describe('Log Operation', () => {
     // Fill patient ID
     await page.getByPlaceholder('Hospital number').fill('PT001');
 
+    // Select grade from dropdown
+    await page.getByLabel('Grade').selectOption('Specialty Trainee 5 (ST5)');
+
     // Fill diagnosis
     await page.getByPlaceholder('e.g., Gr 2 EEC').fill('Gallstone disease');
 
@@ -40,6 +43,31 @@ test.describe('Log Operation', () => {
 
     // The new operation should appear
     await expect(page.getByText('Gallstone disease')).toBeVisible();
+  });
+
+  test('grade field is a dropdown with predefined options only', async ({ page }) => {
+    await page.getByRole('link', { name: 'Log Op' }).click();
+    await expect(page.getByRole('heading', { name: 'Log Operation' })).toBeVisible();
+
+    // Grade should be a select element
+    const gradeSelect = page.getByLabel('Grade');
+    await expect(gradeSelect).toBeVisible();
+
+    // Select a value from dropdown
+    await gradeSelect.selectOption('Clinical Fellow');
+    await expect(gradeSelect).toHaveValue('Clinical Fellow');
+  });
+
+  test('grade pre-fills from settings', async ({ page }) => {
+    // Set grade in settings first
+    await page.getByRole('link', { name: 'Settings' }).click();
+    await page.getByLabel('Trainee grade').selectOption('Specialty Trainee 4 (ST4)');
+
+    // Navigate to log op and check grade is pre-filled
+    await page.getByRole('link', { name: 'Log Op' }).click();
+    await expect(page.getByRole('heading', { name: 'Log Operation' })).toBeVisible();
+
+    await expect(page.getByLabel('Grade')).toHaveValue('Specialty Trainee 4 (ST4)');
   });
 
   test('save button is disabled without procedures selected', async ({ page }) => {
