@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInEmail, signUpEmail, signInGoogle } from '../firebase/auth';
 import { saveConsentRecord } from '../firebase/firestore';
 import { LogIn } from 'lucide-react';
 
 export function Login() {
+  useEffect(() => {
+    document.title = 'Sign in — Theatrelog';
+    return () => { document.title = 'Theatrelog'; };
+  }, []);
+
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

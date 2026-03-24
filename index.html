@@ -8,6 +8,24 @@
     <meta name="theme-color" content="#0B1D3A" />
     <meta name="description" content="Log cases offline in theatre. Generate ARCP-ready summaries in seconds." />
 
+    <!-- Canonical + robots -->
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://theatrelog.uk/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Theatrelog" />
+    <meta property="og:title" content="Theatrelog — Your logbook, sorted." />
+    <meta property="og:description" content="Log cases offline in theatre. Generate ARCP-ready summaries in seconds. No spreadsheets, no stress." />
+    <meta property="og:url" content="https://theatrelog.uk/" />
+    <meta property="og:image" content="https://theatrelog.uk/pwa-512x512.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Theatrelog — Your logbook, sorted." />
+    <meta name="twitter:description" content="Log cases offline in theatre. Generate ARCP-ready summaries in seconds." />
+    <meta name="twitter:image" content="https://theatrelog.uk/pwa-512x512.png" />
+
     <!-- Font preconnect -->
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,6 +40,23 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Theatrelog" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Theatrelog",
+      "description": "A surgical operation logbook PWA for UK doctors building ARCP portfolios. Offline-first with cloud sync.",
+      "url": "https://theatrelog.uk/",
+      "applicationCategory": "MedicalApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "GBP"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

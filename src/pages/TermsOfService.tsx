@@ -1,7 +1,20 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 export function TermsOfService() {
+  useEffect(() => {
+    document.title = 'Terms of Service — Theatrelog';
+    const meta = document.createElement('meta');
+    meta.name = 'robots';
+    meta.content = 'noindex, follow';
+    document.head.appendChild(meta);
+    return () => {
+      document.title = 'Theatrelog';
+      document.head.removeChild(meta);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-surface p-4">
       <div className="max-w-2xl mx-auto space-y-6">

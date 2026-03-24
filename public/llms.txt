@@ -1,0 +1,24 @@
+# Theatrelog
+
+> Surgical operation logbook PWA for UK doctors building ARCP portfolios. Offline-first with cloud sync.
+
+Theatrelog is a free progressive web app (PWA) for UK surgical trainees and doctors to log operative cases in the operating theatre — even without internet connectivity. Cases sync to the cloud when online and can be used to generate ARCP-ready portfolio summaries.
+
+## Key features
+
+- Offline-first case logging with IndexedDB storage
+- Cloud sync via Firebase Firestore
+- ARCP portfolio summary generation
+- 187 default surgical procedures with custom procedure support
+- Supports UK trainee grades (F1–Consultant)
+- GDPR-compliant with right to erasure
+
+## Target users
+
+UK surgical trainees (FY1–ST8), SAS doctors, and consultants building ARCP portfolios.
+
+## Links
+
+- App: https://theatrelog.uk
+- Privacy Policy: https://theatrelog.uk/privacy
+- Terms of Service: https://theatrelog.uk/terms

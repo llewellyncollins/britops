@@ -233,7 +233,7 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 | Environment | Branch       | Firebase Target   | URL                     |
 | ----------- | ------------ | ----------------- | ----------------------- |
 | Staging     | `main`       | `britops-staging` | britops-staging.web.app |
-| Production  | `production` | `britops-1f219`   | britops-1f219.web.app   |
+| Production  | `production` | `britops-1f219`   | https://theatrelog.uk   |
 
 ### Flow
 
