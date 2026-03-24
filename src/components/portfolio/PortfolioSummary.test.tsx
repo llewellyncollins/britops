@@ -96,8 +96,8 @@ describe('PortfolioSummary', () => {
     ];
     render(<PortfolioSummary rows={rows} />);
 
-    // Zero values should show as '-'
-    const dashes = screen.getAllByText('-');
+    // Zero values should show as '–' (en-dash)
+    const dashes = screen.getAllByText('–');
     expect(dashes.length).toBeGreaterThan(0);
   });
 });
