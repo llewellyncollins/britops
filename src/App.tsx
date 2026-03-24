@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { Dashboard } from './pages/Dashboard';
@@ -11,10 +12,30 @@ import { Login } from './pages/Login';
 import { useAuth } from './hooks/useAuth';
 import { useSync } from './hooks/useSync';
 import { SyncProvider } from './context/SyncContext';
+import { useSettingsStore } from './stores/useSettingsStore';
 
 export default function App() {
   const { user } = useAuth();
   const { syncing } = useSync(user);
+  const theme = useSettingsStore((s) => s.theme);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (theme === 'dark') {
+      html.classList.add('dark');
+      return;
+    }
+    if (theme === 'light') {
+      html.classList.remove('dark');
+      return;
+    }
+    // 'system' — follow OS preference
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => html.classList.toggle('dark', mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, [theme]);
 
   return (
     <SyncProvider syncing={syncing}>

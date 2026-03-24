@@ -81,7 +81,7 @@ src/
 │   ├── settings/       # ProcedureTypeManager
 │   └── common/         # OfflineIndicator
 ├── hooks/              # useAuth, useOperations, usePortfolio, useProcedureTypes, useSync
-├── stores/             # useSettingsStore (Zustand persist store for specialty, hospital, grade)
+├── stores/             # useSettingsStore (Zustand persist store for specialty, grade, theme)
 ├── context/            # SyncContext (syncing state for UI indicators)
 ├── firebase/           # config.ts, auth.ts, firestore.ts
 ├── db/                 # dexie.ts (IndexedDB schema, 2 versions)
@@ -164,6 +164,8 @@ interface ConsentRecord {
   privacyPolicyVersion: string;
 }
 
+type ThemePreference = 'system' | 'light' | 'dark'; // local-only, not synced to Firestore
+
 interface UserSettings {
   specialty: string | null;
   hospital: string | null;
@@ -210,7 +212,7 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 
 ### Stores
 
-**`stores/useSettingsStore.ts`** — Zustand store with `persist` middleware. Stores `specialty: string | null` in localStorage (`theatrelog-settings`). Synced to Firestore via `useSync`.
+**`stores/useSettingsStore.ts`** — Zustand store with `persist` middleware. Stores `specialty`, `grade`, and `theme` (`ThemePreference`) in localStorage (`theatrelog-settings`). `specialty`/`grade` synced to Firestore via `useSync`; `theme` is local-only (device preference).
 
 ### Firebase Modules
 

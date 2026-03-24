@@ -15,13 +15,14 @@ import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManage
 import {
   Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
   LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap, AlertTriangle,
+  Monitor, Sun, Moon,
 } from 'lucide-react';
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const { operations, addOperation } = useOperations();
   const { allProcedures, specialties } = useProcedureTypes();
-  const { specialty, setSpecialty, grade, setGrade } = useSettingsStore();
+  const { specialty, setSpecialty, grade, setGrade, theme, setTheme } = useSettingsStore();
   const portfolioRows = usePortfolio(operations, allProcedures);
   const { user, isConfigured } = useAuth();
   const [importing, setImporting] = useState(false);
@@ -171,6 +172,35 @@ export function SettingsPage() {
   return (
     <div className="p-4 max-w-lg mx-auto space-y-6">
       <h1 className="text-xl font-bold">Settings</h1>
+
+      {/* Appearance */}
+      <section className="space-y-3">
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Appearance</h2>
+        <div className="p-3 bg-surface-raised border border-border rounded-lg space-y-2">
+          <p className="text-sm font-medium text-text">Theme</p>
+          <div className="flex gap-2">
+            {([
+              { value: 'system', label: 'System', Icon: Monitor },
+              { value: 'light',  label: 'Light',  Icon: Sun },
+              { value: 'dark',   label: 'Dark',   Icon: Moon },
+            ] as const).map(({ value, label, Icon }) => (
+              <button
+                key={value}
+                onClick={() => setTheme(value)}
+                aria-pressed={theme === value}
+                className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  theme === value
+                    ? 'bg-primary text-white'
+                    : 'bg-surface border border-border text-text-muted hover:border-primary-light'
+                }`}
+              >
+                <Icon size={18} aria-hidden="true" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Clinical Profile */}
       <section className="space-y-3">
