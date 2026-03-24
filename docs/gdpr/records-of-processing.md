@@ -1,4 +1,4 @@
-# Records of Processing Activities — BritOps
+# Records of Processing Activities — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026
@@ -10,8 +10,8 @@
 
 | Field | Details |
 |-------|---------|
-| **Controller** | Each individual doctor using BritOps (personal use) |
-| **Developer/Processor** | BritOps developer — provides the application and cloud infrastructure |
+| **Controller** | Each individual doctor using Theatrelog (personal use) |
+| **Developer/Processor** | Theatrelog developer — provides the application and cloud infrastructure |
 | **Sub-processor** | Google Cloud (Firebase) — authentication, data storage, hosting |
 | **Purpose** | Recording surgical operative experience for ARCP portfolio and professional development |
 | **Lawful basis** | Legitimate interests (Article 6(1)(f)); substantial public interest for health data (Article 9(2)(i)) |

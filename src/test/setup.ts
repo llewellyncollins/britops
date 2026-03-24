@@ -11,6 +11,6 @@ afterEach(() => {
 
 // Reset all IndexedDB databases between tests
 afterEach(async () => {
-  // Delete and recreate the BritOpsDB database
+  // Delete and recreate the local IndexedDB database
   await Dexie.delete('BritOpsDB');
 });

@@ -57,8 +57,12 @@ export function Login() {
     <div className="min-h-screen flex items-center justify-center bg-surface p-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary">BritOps</h1>
-          <p className="text-text-muted text-sm mt-1">Sign in to sync your portfolio</p>
+          <h1 className="sr-only">Sign in to Theatrelog</h1>
+          <picture>
+            <source srcSet="/theatrelog-primary-dark.svg" media="(prefers-color-scheme: dark)" />
+            <img src="/theatrelog-primary-light.svg" alt="Theatrelog" className="h-10 mx-auto" />
+          </picture>
+          <p className="text-text-muted text-sm mt-2">Your logbook, sorted.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,9 +102,9 @@ export function Login() {
               />
               <span>
                 I have read and agree to the{' '}
-                <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                <Link to="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
                 {' '}and{' '}
-                <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+                <Link to="/terms" className="text-accent hover:underline">Terms of Service</Link>
               </span>
             </label>
           )}
@@ -127,7 +131,7 @@ export function Login() {
 
         <p className="text-center text-sm text-text-muted">
           {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-          <button onClick={() => { setIsSignUp(!isSignUp); setConsentChecked(false); }} className="text-primary hover:underline">
+          <button onClick={() => { setIsSignUp(!isSignUp); setConsentChecked(false); }} className="text-accent hover:underline">
             {isSignUp ? 'Sign in' : 'Create one'}
           </button>
         </p>
@@ -140,10 +144,10 @@ export function Login() {
         </button>
 
         <p className="text-center text-xs text-text-muted">
-          By using BritOps you agree to our{' '}
-          <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+          By using Theatrelog you agree to our{' '}
+          <Link to="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
           {' '}and{' '}
-          <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+          <Link to="/terms" className="text-accent hover:underline">Terms of Service</Link>
         </p>
       </div>
     </div>

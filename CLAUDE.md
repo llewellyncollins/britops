@@ -1,6 +1,46 @@
-# BritOps
+# Theatrelog
 
 Surgical operation logbook PWA for UK doctors building ARCP portfolios. Offline-first with cloud sync.
+
+**Tagline:** "Your logbook, sorted."
+**Value prop:** "Log cases offline in theatre. Generate ARCP-ready summaries in seconds. No spreadsheets, no stress."
+
+## Brand
+
+### Colour Palette
+
+| Token | Hex | Role |
+|---|---|---|
+| Navy (primary) | `#0B1D3A` | Headings, nav, primary buttons |
+| Amber (accent) | `#E8943A` | CTAs, active states, highlights |
+| Teal (success) | `#1D9E75` | Success, synced status |
+| Coral (warning/danger) | `#D85A30` | Errors, complications, alerts |
+| White | `#FFFFFF` | Primary background |
+| Light Grey | `#F5F5F5` | Secondary bg, cards |
+| Mid Grey | `#6B7280` | Secondary text, labels |
+| Dark Grey | `#374151` | Body text |
+
+### Typography
+
+| Use | Font | Weight |
+|---|---|---|
+| Headings/display | Satoshi (Fontshare CDN) | Bold / Semibold |
+| Body/UI | Inter (Google Fonts) | Regular / Medium |
+| Monospace | JetBrains Mono (Google Fonts) | Regular |
+
+### Logo Files (`/brand`)
+
+| File | Use |
+|---|---|
+| `theatrelog-primary-light.svg` | Login page, marketing (light bg) |
+| `theatrelog-primary-dark.svg` | Splash screens (dark bg) |
+| `theatrelog-no-tagline-light.svg` | Compact header (light bg) |
+| `theatrelog-no-tagline-dark.svg` | App header (navy bg) ← used in AppShell |
+| `theatrelog-wordmark-light/dark.svg` | Footers, tight spaces |
+| `theatrelog-icon-navy.svg` | Primary app icon / favicon source |
+| `theatrelog-icon-white/amber/monochrome.svg` | Alternate icon variants |
+
+Run `npm run icons` to regenerate PNG icons from `brand/theatrelog-icon-navy.svg`.
 
 ## Tech Stack
 
@@ -170,7 +210,7 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 
 ### Stores
 
-**`stores/useSettingsStore.ts`** — Zustand store with `persist` middleware. Stores `specialty: string | null` in localStorage (`britops-settings`). Synced to Firestore via `useSync`.
+**`stores/useSettingsStore.ts`** — Zustand store with `persist` middleware. Stores `specialty: string | null` in localStorage (`theatrelog-settings`). Synced to Firestore via `useSync`.
 
 ### Firebase Modules
 

@@ -1,4 +1,4 @@
-# Incident Management Process — BritOps
+# Incident Management Process — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026
@@ -8,7 +8,7 @@
 
 ## 1. Scope
 
-This document describes the process for managing clinical safety incidents related to BritOps. A clinical safety incident is any event where the system may have contributed to, or had the potential to contribute to, patient harm or data breach.
+This document describes the process for managing clinical safety incidents related to Theatrelog. A clinical safety incident is any event where the system may have contributed to, or had the potential to contribute to, patient harm or data breach.
 
 ---
 

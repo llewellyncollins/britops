@@ -15,7 +15,7 @@ export function TermsOfService() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">1. Purpose</h2>
           <p className="text-sm leading-relaxed">
-            BritOps is a personal surgical operation logbook tool designed to help UK doctors
+            Theatrelog is a personal surgical operation logbook tool designed to help UK doctors
             record their operative experience for ARCP portfolio purposes. It is provided as
             a personal productivity tool and is not a clinical decision support system, medical
             device, or shared clinical record.
@@ -37,7 +37,7 @@ export function TermsOfService() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">3. Clinical Disclaimer</h2>
           <p className="text-sm leading-relaxed">
-            BritOps is a record-keeping tool only. It does not provide clinical advice,
+            Theatrelog is a record-keeping tool only. It does not provide clinical advice,
             diagnostic support, or treatment recommendations. No clinical decisions should
             be made based solely on data recorded in this application. The developer accepts
             no liability for clinical outcomes related to the use of this tool.
@@ -47,8 +47,8 @@ export function TermsOfService() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">4. Data &amp; Privacy</h2>
           <p className="text-sm leading-relaxed">
-            Your use of BritOps is subject to our{' '}
-            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>,
+            Your use of Theatrelog is subject to our{' '}
+            <Link to="/privacy" className="text-accent hover:underline">Privacy Policy</Link>,
             which explains how your data is collected, stored, and protected.
           </p>
         </section>
@@ -56,7 +56,7 @@ export function TermsOfService() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">5. Service Availability</h2>
           <p className="text-sm leading-relaxed">
-            BritOps is provided on an &quot;as is&quot; basis. While we aim for high availability,
+            Theatrelog is provided on an &quot;as is&quot; basis. While we aim for high availability,
             we do not guarantee uninterrupted access. The offline-first architecture means
             your data remains accessible on your device even without an internet connection.
           </p>
@@ -65,7 +65,7 @@ export function TermsOfService() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">6. Intellectual Property</h2>
           <p className="text-sm leading-relaxed">
-            The BritOps application and its original content are the property of the developer.
+            The Theatrelog application and its original content are the property of the developer.
             Your operation records and data remain your property at all times.
           </p>
         </section>
@@ -83,7 +83,7 @@ export function TermsOfService() {
           <h2 className="text-lg font-semibold">8. Changes to Terms</h2>
           <p className="text-sm leading-relaxed">
             We may update these terms from time to time. The &quot;Last updated&quot; date at the top
-            will reflect the most recent revision. Continued use of BritOps after changes
+            will reflect the most recent revision. Continued use of Theatrelog after changes
             constitutes acceptance of the updated terms.
           </p>
         </section>
@@ -94,6 +94,8 @@ export function TermsOfService() {
             These terms are governed by the laws of England and Wales.
           </p>
         </section>
+
+        <p className="text-xs text-text-muted">© 2026 Theatrelog</p>
       </div>
     </div>
   );

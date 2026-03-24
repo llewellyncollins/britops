@@ -1,4 +1,4 @@
-# Hazard Log — BritOps
+# Hazard Log — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026

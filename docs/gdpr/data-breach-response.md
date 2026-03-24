@@ -1,4 +1,4 @@
-# Data Breach Response Plan — BritOps
+# Data Breach Response Plan — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026
@@ -8,7 +8,7 @@
 
 ## 1. What Constitutes a Breach
 
-A personal data breach is a security incident leading to the accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to, personal data. For BritOps, this includes:
+A personal data breach is a security incident leading to the accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to, personal data. For Theatrelog, this includes:
 
 - Firestore Security Rules misconfiguration allowing cross-user data access
 - Unauthorised access to the Firebase project or service account

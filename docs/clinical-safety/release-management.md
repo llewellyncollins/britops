@@ -1,4 +1,4 @@
-# Release Management — BritOps
+# Release Management — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026
@@ -8,7 +8,7 @@
 
 ## Change Control Process
 
-All changes to BritOps follow a controlled CI/CD pipeline:
+All changes to Theatrelog follow a controlled CI/CD pipeline:
 
 ### 1. Development
 - Changes are made on feature branches

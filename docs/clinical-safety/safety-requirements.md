@@ -1,4 +1,4 @@
-# Safety Requirements Traceability — BritOps
+# Safety Requirements Traceability — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026

@@ -1,4 +1,4 @@
-# Clinical Safety Case Report — BritOps
+# Clinical Safety Case Report — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026
@@ -9,7 +9,7 @@
 
 ## 1. System Description
 
-BritOps is a Progressive Web Application (PWA) that provides UK surgical trainees with a personal operation logbook for recording their operative experience. It is designed to support ARCP (Annual Review of Competence Progression) portfolio preparation.
+Theatrelog is a Progressive Web Application (PWA) that provides UK surgical trainees with a personal operation logbook for recording their operative experience. It is designed to support ARCP (Annual Review of Competence Progression) portfolio preparation.
 
 **Key characteristics:**
 - Personal single-user tool (not a shared clinical record system)
@@ -26,7 +26,7 @@ BritOps is a Progressive Web Application (PWA) that provides UK surgical trainee
 
 ## 2. Clinical Context
 
-BritOps serves exclusively as a record-keeping tool for professional development. It replaces paper-based logbooks and spreadsheets that trainees use to track surgical experience.
+Theatrelog serves exclusively as a record-keeping tool for professional development. It replaces paper-based logbooks and spreadsheets that trainees use to track surgical experience.
 
 **The app does NOT:**
 - Make or suggest clinical decisions
@@ -96,7 +96,7 @@ The system presents no unmitigated hazards at Significant or higher severity.
 
 ## 7. Conclusion
 
-BritOps is assessed as **safe for its intended use** as a personal surgical operation logbook. The system's clinical risk profile is low, with the highest identified risk (patient data exposure) mitigated through appropriate technical controls. The system does not make clinical decisions and is not classified as a medical device.
+Theatrelog is assessed as **safe for its intended use** as a personal surgical operation logbook. The system's clinical risk profile is low, with the highest identified risk (patient data exposure) mitigated through appropriate technical controls. The system does not make clinical decisions and is not classified as a medical device.
 
 This safety case should be reviewed:
 - Annually, or

@@ -8,9 +8,9 @@ interface Props {
 }
 
 const INVOLVEMENT_COLORS = {
-  assistant:   'bg-blue-100 text-blue-800',
-  supervised:  'bg-amber-100 text-amber-800',
-  independent: 'bg-green-100 text-green-800',
+  assistant:   'bg-blue-50 text-primary',
+  supervised:  'bg-amber-50 text-accent-dark',
+  independent: 'bg-emerald-50 text-success',
 };
 
 const INVOLVEMENT_LABELS = {

@@ -40,13 +40,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png', 'theatrelog-icon-navy.svg'],
       manifest: {
-        name: 'BritOps - Operation Logbook',
-        short_name: 'BritOps',
-        description: 'Track surgical operations for your ARCP portfolio',
-        theme_color: '#1e40af',
-        background_color: '#f8fafc',
+        name: 'Theatrelog — Operation Logbook',
+        short_name: 'Theatrelog',
+        description: 'Log cases offline in theatre. Generate ARCP-ready summaries in seconds.',
+        theme_color: '#0B1D3A',
+        background_color: '#F5F5F5',
         display: 'standalone',
         orientation: 'portrait-primary',
         icons: [

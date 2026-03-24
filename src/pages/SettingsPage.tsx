@@ -136,7 +136,7 @@ export function SettingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `britops-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `theatrelog-export-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -170,17 +170,17 @@ export function SettingsPage() {
 
   return (
     <div className="p-4 max-w-lg mx-auto space-y-6">
-      <h2 className="text-xl font-bold">Settings</h2>
+      <h1 className="text-xl font-bold">Settings</h1>
 
       {/* Clinical Profile */}
       <section className="space-y-3">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Clinical Profile</h3>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Clinical Profile</h2>
         <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
           <div className="flex items-start gap-3">
-            <Stethoscope aria-hidden="true" size={20} className="text-primary mt-2 shrink-0" />
+            <Stethoscope aria-hidden="true" size={20} className="text-accent mt-2 shrink-0" />
             <div className="flex-1 space-y-3">
               <div>
-                <label htmlFor="settings-grade" className="block text-sm font-medium text-text-muted mb-1">Trainee grade</label>
+                <label htmlFor="settings-grade" className="block text-sm font-medium text-text mb-1">Trainee grade</label>
                 <select
                   id="settings-grade"
                   value={grade ?? ''}
@@ -199,11 +199,13 @@ export function SettingsPage() {
 
       {/* Specialty */}
       <section className="space-y-3">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Your Specialty</h3>
+        <h2 id="settings-specialty-label" className="font-semibold text-text text-sm uppercase tracking-wide">Your Specialty</h2>
         <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-          <GraduationCap aria-hidden="true" size={20} className="text-primary" />
+          <GraduationCap aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="flex-1">
             <select
+              id="settings-specialty"
+              aria-labelledby="settings-specialty-label"
               value={specialty ?? ''}
               onChange={e => setSpecialty(e.target.value || null)}
               className="input"
@@ -223,10 +225,10 @@ export function SettingsPage() {
       {/* Account */}
       {isConfigured && (
         <section className="space-y-3">
-          <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Account</h3>
+          <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Account</h2>
           {user ? (
             <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-              <User aria-hidden="true" size={20} className="text-primary" />
+              <User aria-hidden="true" size={20} className="text-accent shrink-0" />
               <div className="flex-1">
                 <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
                 <p className="text-xs text-text-muted">Syncing enabled</p>
@@ -241,7 +243,7 @@ export function SettingsPage() {
                 onClick={() => setShowLogin(!showLogin)}
                 aria-expanded={showLogin}
                 aria-controls="settings-login-panel"
-                className="w-full flex items-center gap-3 p-3 hover:border-primary-light text-sm font-medium text-primary"
+                className="w-full flex items-center gap-3 p-3 text-sm font-semibold text-accent hover:text-accent-dark transition-colors"
               >
                 <LogIn aria-hidden="true" size={20} />
                 <span>Sign in to enable sync</span>
@@ -280,9 +282,9 @@ export function SettingsPage() {
                         />
                         <span>
                           I have read and agree to the{' '}
-                          <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                          <Link to="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
                           {' '}and{' '}
-                          <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+                          <Link to="/terms" className="text-accent hover:underline">Terms of Service</Link>
                         </span>
                       </label>
                     )}
@@ -305,7 +307,7 @@ export function SettingsPage() {
                   </button>
                   <p className="text-center text-xs text-text-muted">
                     {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                    <button onClick={() => { setIsSignUp(!isSignUp); setLoginError(''); setConsentChecked(false); }} className="text-primary hover:underline">
+                    <button onClick={() => { setIsSignUp(!isSignUp); setLoginError(''); setConsentChecked(false); }} className="text-accent hover:underline">
                       {isSignUp ? 'Sign in' : 'Create one'}
                     </button>
                   </p>
@@ -324,9 +326,9 @@ export function SettingsPage() {
           aria-controls="settings-procedures-panel"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Stethoscope aria-hidden="true" size={20} className="text-primary" />
+          <Stethoscope aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="text-left flex-1">
-            <p className="font-medium text-sm">Procedure Types</p>
+            <p className="font-medium text-sm text-text">Procedure Types</p>
             <p className="text-xs text-text-muted">
               Add custom procedures or browse {allProcedures.length} built-in entries
             </p>
@@ -342,13 +344,13 @@ export function SettingsPage() {
 
       {/* Export */}
       <section className="space-y-3">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Export</h3>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Export</h2>
 
         <button
           onClick={exportXlsx}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <FileSpreadsheet aria-hidden="true" size={20} className="text-primary" />
+          <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="text-left">
             <p className="font-medium text-sm">Export Portfolio (Excel)</p>
             <p className="text-xs text-text-muted">Download as .xlsx with summary + log</p>
@@ -359,7 +361,7 @@ export function SettingsPage() {
           onClick={exportCSV}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Download aria-hidden="true" size={20} className="text-primary" />
+          <Download aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="text-left">
             <p className="font-medium text-sm">Export to CSV</p>
             <p className="text-xs text-text-muted">Download all operations as CSV</p>
@@ -371,7 +373,7 @@ export function SettingsPage() {
             onClick={() => exportAllDataJson(user.uid)}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
-            <FileJson aria-hidden="true" size={20} className="text-primary" />
+            <FileJson aria-hidden="true" size={20} className="text-accent shrink-0" />
             <div className="text-left">
               <p className="font-medium text-sm">Export All My Data (JSON)</p>
               <p className="text-xs text-text-muted">Complete data export for GDPR portability</p>
@@ -382,7 +384,7 @@ export function SettingsPage() {
 
       {/* Import */}
       <section className="space-y-3">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Import</h3>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Import</h2>
 
         <input
           ref={fileInputRef}
@@ -396,7 +398,7 @@ export function SettingsPage() {
           disabled={importing}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Upload aria-hidden="true" size={20} className="text-primary" />
+          <Upload aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="text-left">
             <p className="font-medium text-sm">{importing ? 'Importing...' : 'Import from Excel'}</p>
             <p className="text-xs text-text-muted">Import operations from .xlsx logbook</p>
@@ -411,13 +413,13 @@ export function SettingsPage() {
 
       {/* Privacy & Data */}
       <section className="space-y-3">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Privacy &amp; Data</h3>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Privacy &amp; Data</h2>
 
         <Link
           to="/privacy"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Shield aria-hidden="true" size={20} className="text-primary" />
+          <Shield aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Privacy Policy</p>
             <p className="text-xs text-text-muted">How your data is collected, stored, and protected</p>
@@ -429,7 +431,7 @@ export function SettingsPage() {
           to="/terms"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <FileSpreadsheet aria-hidden="true" size={20} className="text-primary" />
+          <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Terms of Service</p>
             <p className="text-xs text-text-muted">Usage terms and clinical disclaimer</p>
@@ -439,16 +441,19 @@ export function SettingsPage() {
       </section>
 
       {/* Danger Zone */}
-      <section className="space-y-3">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">Danger Zone</h3>
+      <section className="space-y-3 border border-danger/30 bg-danger/5 rounded-xl p-4">
+        <h2 className="font-semibold text-danger text-sm uppercase tracking-wide flex items-center gap-1.5">
+          <AlertTriangle aria-hidden="true" size={15} />
+          Danger Zone
+        </h2>
         <button
           onClick={clearData}
-          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-red-200 rounded-lg hover:border-danger transition-colors"
+          className="w-full flex items-center gap-3 p-3 bg-danger text-white rounded-lg hover:bg-warning transition-colors"
         >
-          <Trash2 aria-hidden="true" size={20} className="text-danger" />
+          <Trash2 aria-hidden="true" size={20} />
           <div className="text-left">
-            <p className="font-medium text-sm text-danger">Clear all operations</p>
-            <p className="text-xs text-text-muted">Permanently delete all local operation data</p>
+            <p className="font-semibold text-sm">Clear all operations</p>
+            <p className="text-xs opacity-80">Permanently delete all local operation data</p>
           </div>
         </button>
 
@@ -486,8 +491,8 @@ export function SettingsPage() {
 
       {/* About */}
       <section className="space-y-2">
-        <h3 className="font-semibold text-text-muted text-sm uppercase tracking-wide">About</h3>
-        <p className="text-sm text-text-muted">BritOps v0.2.0 — Surgical operation logbook</p>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">About</h2>
+        <p className="text-sm text-text-muted">Theatrelog v0.2.0 — Surgical operation logbook</p>
         <p className="text-xs text-text-muted">
           Data stored locally on device.{' '}
           {isConfigured ? 'Firebase sync available.' : 'Configure Firebase for cloud sync.'}

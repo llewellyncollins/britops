@@ -13,9 +13,9 @@ export function PrivacyPolicy() {
         <p className="text-sm text-text-muted">Last updated: 16 March 2026</p>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">1. What BritOps Is</h2>
+          <h2 className="text-lg font-semibold">1. What Theatrelog Is</h2>
           <p className="text-sm leading-relaxed">
-            BritOps is a personal surgical operation logbook designed for UK doctors building
+            Theatrelog is a personal surgical operation logbook designed for UK doctors building
             ARCP (Annual Review of Competence Progression) portfolios. It is not a shared
             clinical record system and does not provide clinical decision support.
           </p>
@@ -23,7 +23,7 @@ export function PrivacyPolicy() {
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">2. Data We Collect</h2>
-          <p className="text-sm leading-relaxed">When you use BritOps, the following data is stored:</p>
+          <p className="text-sm leading-relaxed">When you use Theatrelog, the following data is stored:</p>
           <ul className="list-disc list-inside text-sm space-y-1 ml-2">
             <li><strong>Account information:</strong> email address (if you create an account)</li>
             <li><strong>Operation records:</strong> date, patient hospital number, diagnosis,
@@ -59,7 +59,7 @@ export function PrivacyPolicy() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">5. Third Parties</h2>
           <p className="text-sm leading-relaxed">
-            BritOps uses Firebase (Google Cloud) for authentication and data storage. Google
+            Theatrelog uses Firebase (Google Cloud) for authentication and data storage. Google
             acts as a data processor. No other third parties receive your data. There are no
             analytics, tracking, or advertising services.
           </p>
@@ -89,7 +89,7 @@ export function PrivacyPolicy() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">8. Cookies &amp; Local Storage</h2>
           <p className="text-sm leading-relaxed">
-            BritOps uses IndexedDB and localStorage for core app functionality (storing your
+            Theatrelog uses IndexedDB and localStorage for core app functionality (storing your
             operation records and preferences). These are strictly necessary for the app to
             work and fall under the PECR exemption for essential storage. No tracking cookies
             or third-party cookies are used.
@@ -120,10 +120,12 @@ export function PrivacyPolicy() {
           <h2 className="text-lg font-semibold">11. Changes to This Policy</h2>
           <p className="text-sm leading-relaxed">
             We may update this policy from time to time. The &quot;Last updated&quot; date at the top
-            will reflect the most recent revision. Continued use of BritOps after changes
+            will reflect the most recent revision. Continued use of Theatrelog after changes
             constitutes acceptance of the updated policy.
           </p>
         </section>
+
+        <p className="text-xs text-text-muted">© 2026 Theatrelog</p>
       </div>
     </div>
   );

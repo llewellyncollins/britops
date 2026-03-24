@@ -26,13 +26,13 @@ export function OfflineIndicator() {
     >
       {!online ? (
         <>
-          <WifiOff aria-hidden="true" size={16} className="text-yellow-300" />
-          <span className="text-yellow-200 text-xs">Offline</span>
+          <WifiOff aria-hidden="true" size={16} className="text-amber-300" />
+          <span className="text-amber-200 text-xs">Offline</span>
         </>
       ) : (
         <>
-          <Wifi aria-hidden="true" size={16} className="text-green-300" />
-          {syncing && <RefreshCw aria-hidden="true" size={13} className="text-green-300 animate-spin" />}
+          <Wifi aria-hidden="true" size={16} className="text-emerald-300" />
+          {syncing && <RefreshCw aria-hidden="true" size={13} className="text-emerald-300 animate-spin" />}
         </>
       )}
     </div>

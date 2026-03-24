@@ -19,7 +19,7 @@ export async function exportAllDataJson(userId: string): Promise<void> {
   const allTypes = await db.procedureTypes.toArray();
   const customTypes = allTypes.filter(t => t.isCustom);
 
-  const settingsRaw = localStorage.getItem('britops-settings');
+  const settingsRaw = localStorage.getItem('theatrelog-settings');
   const settings = settingsRaw ? JSON.parse(settingsRaw) : {};
 
   const data: DataExport = {
@@ -34,7 +34,7 @@ export async function exportAllDataJson(userId: string): Promise<void> {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `britops-data-export-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `theatrelog-data-export-${new Date().toISOString().split('T')[0]}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

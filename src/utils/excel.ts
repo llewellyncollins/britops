@@ -76,7 +76,7 @@ export function exportPortfolioXlsx(
   ];
   XLSX.utils.book_append_sheet(wb, ws2, 'log book');
 
-  XLSX.writeFile(wb, `britops-${new Date().toISOString().split('T')[0]}.xlsx`);
+  XLSX.writeFile(wb, `theatrelog-${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
 export function importFromXlsx(

@@ -20,7 +20,7 @@ export function BottomNav() {
           className={({ isActive }) =>
             cn(
               'flex flex-col items-center gap-0.5 px-3 py-1 text-xs rounded-lg transition-colors',
-              isActive ? 'text-primary font-semibold' : 'text-text-muted hover:text-text'
+              isActive ? 'text-accent font-semibold' : 'text-text-muted hover:text-text'
             )
           }
         >

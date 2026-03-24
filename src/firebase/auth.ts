@@ -44,7 +44,7 @@ export async function deleteAccount(): Promise<void> {
   // Clear all local data
   await db.operations.clear();
   await db.procedureTypes.clear();
-  localStorage.removeItem('britops-settings');
+  localStorage.removeItem('theatrelog-settings');
 
   // Delete the Firebase Auth account
   await deleteUser(user);

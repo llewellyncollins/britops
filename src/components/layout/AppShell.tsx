@@ -12,7 +12,7 @@ export function AppShell() {
         Skip to main content
       </a>
       <header className="bg-primary text-white px-4 py-3 flex items-center justify-between shadow-sm">
-        <h1 className="text-lg font-bold tracking-tight">BritOps</h1>
+        <img src="/theatrelog-no-tagline-dark.svg" alt="Theatrelog" className="h-7" />
         <OfflineIndicator />
       </header>
       <main id="main-content" className="flex-1 overflow-y-auto pb-20">

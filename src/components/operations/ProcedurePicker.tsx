@@ -64,7 +64,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
 
   return (
     <div ref={ref} className="relative">
-      <label htmlFor={TRIGGER_ID} className="block text-sm font-medium text-text-muted mb-1">
+      <label htmlFor={TRIGGER_ID} className="block text-sm font-medium text-text mb-1">
         Procedures
       </label>
 
@@ -75,7 +75,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen(!open)}
-        className="min-h-[42px] w-full border border-border rounded-lg px-3 py-2 bg-white cursor-pointer flex flex-wrap gap-1.5 items-center text-left"
+        className="min-h-[42px] w-full border border-border rounded-lg px-3 py-2 bg-surface-raised text-text cursor-pointer flex flex-wrap gap-1.5 items-center text-left"
       >
         {selectedProcs.length === 0 && (
           <span className="text-text-muted text-sm flex-1">Select procedures...</span>
@@ -106,10 +106,10 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
           role="listbox"
           aria-label="Procedures"
           aria-multiselectable="true"
-          className="absolute z-50 mt-1 w-full bg-white border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto"
+          className="absolute z-50 mt-1 w-full bg-surface-raised border border-border rounded-lg shadow-xl max-h-80 overflow-y-auto"
         >
           {/* Search bar */}
-          <div className="sticky top-0 bg-white p-2 border-b border-border">
+          <div className="sticky top-0 bg-surface-raised p-2 border-b border-border">
             <div className="relative">
               <Search aria-hidden="true" size={15} className="absolute left-2.5 top-2.5 text-text-muted" />
               <input
@@ -118,7 +118,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                 placeholder="Search by name, specialty or category..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-light"
+                className="w-full pl-8 pr-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-2 focus:ring-primary-light"
                 autoFocus
               />
             </div>
@@ -138,7 +138,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
               {categories.map(({ category, items }) => (
                 <div key={category}>
                   {/* Category sub-header */}
-                  <div aria-hidden="true" className="px-4 py-1 bg-gray-50 text-xs font-semibold text-text-muted uppercase tracking-wide">
+                  <div aria-hidden="true" className="px-4 py-1 bg-surface text-xs font-semibold text-text-muted uppercase tracking-wide">
                     {category}
                   </div>
 
@@ -149,8 +149,8 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                       role="option"
                       aria-selected={selected.includes(p.id)}
                       onClick={() => toggle(p.id)}
-                      className={`w-full text-left px-5 py-2 text-sm hover:bg-blue-50 flex items-center justify-between gap-2 ${
-                        selected.includes(p.id) ? 'bg-blue-50 text-primary font-medium' : ''
+                      className={`w-full text-left px-5 py-2 text-sm text-text hover:bg-primary/10 flex items-center justify-between gap-2 ${
+                        selected.includes(p.id) ? 'bg-primary/10 text-primary font-medium' : ''
                       }`}
                     >
                       <span>
@@ -160,7 +160,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                         )}
                       </span>
                       {selected.includes(p.id) && (
-                        <span aria-hidden="true" className="text-primary shrink-0">✓</span>
+                        <span aria-hidden="true" className="text-accent shrink-0">✓</span>
                       )}
                     </button>
                   ))}

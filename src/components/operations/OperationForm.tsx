@@ -27,7 +27,7 @@ export function OperationForm({ existing }: Props) {
   // Remount inner form when specialty changes so schema/fields/defaults reset
   return (
     <div className="p-4 space-y-4 max-w-lg mx-auto">
-      <h2 className="text-xl font-bold">{existing ? 'Edit Operation' : 'Log Operation'}</h2>
+      <h1 className="text-xl font-bold">{existing ? 'Edit Operation' : 'Log Operation'}</h1>
 
       <SpecialtySelector specialty={specialty} onChange={setSpecialty} />
 
@@ -41,7 +41,7 @@ function SpecialtySelector({ specialty, onChange }: { specialty: string | null; 
 
   return (
     <div className="flex items-center gap-2 p-2 bg-surface-raised border border-border rounded-lg">
-      <GraduationCap aria-hidden="true" size={16} className="text-primary shrink-0" />
+      <GraduationCap aria-hidden="true" size={16} className="text-accent shrink-0" />
       <label htmlFor="specialty-select" className="sr-only">Specialty</label>
       <select
         id="specialty-select"
@@ -111,7 +111,7 @@ function OperationFormInner({ specialty, existing }: { specialty: string | null;
       <button
         type="submit"
         disabled={isSubmitting || !isValid}
-        className="w-full bg-primary text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-dark disabled:opacity-50 transition-colors"
+        className="w-full bg-accent text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-accent-dark disabled:opacity-50 transition-colors shadow-sm"
       >
         <Save aria-hidden="true" size={18} />
         {isSubmitting ? 'Saving...' : existing ? 'Update Operation' : 'Save Operation'}

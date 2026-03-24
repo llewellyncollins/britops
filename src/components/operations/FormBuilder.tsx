@@ -120,10 +120,10 @@ function FieldRenderer({
                   role="radio"
                   aria-checked={f.value === opt.value}
                   onClick={() => f.onChange(opt.value)}
-                  className={`flex-1 py-2 px-3 text-sm rounded-lg border transition-colors ${
+                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg border transition-colors ${
                     f.value === opt.value
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-white text-text border-border hover:border-primary-light'
+                      ? 'bg-accent text-white border-accent shadow-sm'
+                      : 'bg-surface-raised text-text border-border hover:border-primary-light'
                   }`}
                 >
                   {opt.label}
@@ -267,7 +267,7 @@ function FieldWrapper({
 }) {
   return (
     <div>
-      <label htmlFor={fieldId} className="block text-sm font-medium text-text-muted mb-1">
+      <label htmlFor={fieldId} className="block text-sm font-medium text-text mb-1">
         {label}
         {required && <span aria-hidden="true" className="text-danger ml-0.5">*</span>}
       </label>

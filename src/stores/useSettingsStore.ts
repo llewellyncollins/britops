@@ -21,6 +21,6 @@ export const useSettingsStore = create<SettingsState>()(
       setGrade: (grade) => set({ grade }),
       setSettings: (settings) => set(settings),
     }),
-    { name: 'britops-settings' },
+    { name: 'theatrelog-settings' },
   ),
 );

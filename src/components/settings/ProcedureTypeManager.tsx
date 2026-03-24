@@ -114,18 +114,18 @@ export function ProcedureTypeManager() {
       {!showAdd ? (
         <button
           onClick={() => setShowAdd(true)}
-          className="w-full flex items-center gap-2 p-3 border border-dashed border-border rounded-lg hover:border-primary-light text-primary text-sm transition-colors"
+          className="w-full flex items-center gap-2 p-3 border border-dashed border-border rounded-lg hover:border-accent text-accent text-sm font-medium transition-colors"
         >
           <Plus size={16} />
           Add custom procedure
         </button>
       ) : (
-        <div className="border border-primary-light rounded-lg p-4 space-y-3 bg-blue-50/30">
-          <p className="text-sm font-semibold text-primary">New Procedure</p>
+        <div className="border border-accent/40 rounded-lg p-4 space-y-3 bg-surface-raised">
+          <p className="text-sm font-semibold text-text">New Procedure</p>
 
           {/* Specialty */}
           <div>
-            <label htmlFor="new-proc-specialty" className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-specialty" className="block text-xs font-medium text-text mb-1">
               Specialty *
             </label>
             <select
@@ -165,7 +165,7 @@ export function ProcedureTypeManager() {
 
           {/* Category */}
           <div>
-            <label htmlFor="new-proc-category" className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-category" className="block text-xs font-medium text-text mb-1">
               Category (type) *
             </label>
             <select
@@ -205,7 +205,7 @@ export function ProcedureTypeManager() {
 
           {/* Subcategory */}
           <div>
-            <label htmlFor="new-proc-subcategory" className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-subcategory" className="block text-xs font-medium text-text mb-1">
               Subtype <span className="font-normal">(optional)</span>
             </label>
             <input
@@ -222,7 +222,7 @@ export function ProcedureTypeManager() {
 
           {/* Name */}
           <div>
-            <label htmlFor="new-proc-name" className="block text-xs font-medium text-text-muted mb-1">
+            <label htmlFor="new-proc-name" className="block text-xs font-medium text-text mb-1">
               Procedure name *
             </label>
             <input
@@ -241,7 +241,7 @@ export function ProcedureTypeManager() {
               disabled={
                 !resolvedSpecialty || !resolvedCategory || !form.name.trim()
               }
-              className="flex-1 bg-primary text-white py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-primary-dark transition-colors"
+              className="flex-1 bg-accent text-white py-2 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-accent-dark transition-colors"
             >
               Add Procedure
             </button>
@@ -250,7 +250,7 @@ export function ProcedureTypeManager() {
                 setShowAdd(false);
                 setForm(EMPTY_FORM);
               }}
-              className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-border rounded-lg text-sm text-text hover:bg-surface transition-colors"
             >
               Cancel
             </button>
@@ -261,7 +261,7 @@ export function ProcedureTypeManager() {
       {/* Custom procedures list */}
       {allSpecialtiesWithCustom.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+          <p className="text-xs font-semibold text-text uppercase tracking-wide">
             Your custom procedures
           </p>
           {allSpecialtiesWithCustom.map((sp) => (
@@ -273,7 +273,7 @@ export function ProcedureTypeManager() {
                 onClick={() => toggleSpecialty(sp)}
                 aria-expanded={expandedSpecialties.has(sp)}
                 aria-controls={`custom-sp-${sp}`}
-                className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 text-sm font-semibold"
+                className="w-full flex items-center justify-between px-3 py-2 bg-surface hover:bg-primary/10 text-sm font-semibold text-text"
               >
                 <span>
                   {sp}{" "}
@@ -292,7 +292,7 @@ export function ProcedureTypeManager() {
                   {customBySpecialty[sp].map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between px-3 py-2 hover:bg-blue-50/30"
+                      className="flex items-center justify-between px-3 py-2 hover:bg-primary/10"
                     >
                       <div>
                         <span className="text-sm">{p.name}</span>
@@ -301,7 +301,7 @@ export function ProcedureTypeManager() {
                             ({p.subcategory})
                           </span>
                         )}
-                        <span className="ml-2 text-xs text-text-muted bg-gray-100 px-1.5 py-0.5 rounded">
+                        <span className="ml-2 text-xs text-text-muted bg-surface px-1.5 py-0.5 rounded">
                           {p.category}
                         </span>
                       </div>
@@ -335,7 +335,7 @@ export function ProcedureTypeManager() {
               onClick={() => toggleSpecialty(`default_${sp}`)}
               aria-expanded={expandedSpecialties.has(`default_${sp}`)}
               aria-controls={`default-sp-${sp}`}
-              className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 text-sm"
+              className="w-full flex items-center justify-between px-3 py-2 bg-surface hover:bg-primary/10 text-sm text-text"
             >
               <span className="font-medium">{sp}</span>
               <span className="flex items-center gap-1 text-text-muted text-xs">
@@ -352,7 +352,7 @@ export function ProcedureTypeManager() {
                 {defaultBySpecialty[sp].map((p) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between px-3 py-1.5 text-sm text-text-muted"
+                    className="flex items-center justify-between px-3 py-1.5 text-sm text-text"
                   >
                     <span>
                       {p.name}
@@ -360,7 +360,7 @@ export function ProcedureTypeManager() {
                         <span className="ml-1 text-xs">({p.subcategory})</span>
                       )}
                     </span>
-                    <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded shrink-0 ml-2">
+                    <span className="text-xs text-text-muted bg-surface px-1.5 py-0.5 rounded shrink-0 ml-2">
                       {p.category}
                     </span>
                   </div>

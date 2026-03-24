@@ -1,4 +1,4 @@
-# Data Protection Impact Assessment (DPIA) — BritOps
+# Data Protection Impact Assessment (DPIA) — Theatrelog
 
 **Document version:** 1.0
 **Date:** 16 March 2026
@@ -25,7 +25,7 @@ To maintain a personal surgical operation logbook for the doctor's professional 
 Legitimate interests of the data controller (the doctor) for professional development (Article 6(1)(f)). For special category health data (Article 9), processing is necessary for reasons of substantial public interest in the area of public health and healthcare quality (Article 9(2)(i), Schedule 1 Part 1 paragraph 2 of the DPA 2018).
 
 ### Data controller
-Each individual doctor using BritOps acts as the data controller for the patient data they enter. The developer provides the tool (data processor role for cloud-stored data).
+Each individual doctor using Theatrelog acts as the data controller for the patient data they enter. The developer provides the tool (data processor role for cloud-stored data).
 
 ### Data processor
 Google Cloud (Firebase) acts as data processor for cloud-synced data. Google's Data Processing Agreement applies.
