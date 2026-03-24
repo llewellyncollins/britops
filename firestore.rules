@@ -30,6 +30,19 @@ service cloud.firestore {
         && request.auth.uid == userId;
     }
 
+    // Support requests — users can only create their own; read/update/delete via admin console
+    match /supportRequests/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // Support rate-limit counters — per-user doc scoped by UID
+    match /supportLimits/{userId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
     // Deny everything else
     match /{document=**} {
       allow read, write: if false;

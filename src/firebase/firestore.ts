@@ -195,6 +195,92 @@ export async function getConsentRecord(userId: string): Promise<ConsentRecord | 
   return snap.exists() ? (snap.data() as ConsentRecord) : null;
 }
 
+// ─── Support Requests ────────────────────────────────────────────────────────
+
+const SUPPORT_COLLECTION = 'supportRequests';
+const SUPPORT_LIMITS_COLLECTION = 'supportLimits';
+const SUPPORT_DAILY_LIMIT = 3;
+
+export interface SupportRequest {
+  userId: string;
+  type: 'bug' | 'feature';
+  subject: string;
+  description: string;
+  email: string;
+  appVersion: string;
+  userAgent: string;
+  createdAt: string;
+  resolved: boolean;
+  resolvedAt: string | null;
+}
+
+interface SupportLimit {
+  count: number;
+  windowStart: string; // ISO date string (YYYY-MM-DD)
+}
+
+/**
+ * Check if user is within the daily rate limit. Returns remaining submissions.
+ * Resets the counter if the window date has changed (new day).
+ */
+export async function checkSupportRateLimit(
+  userId: string,
+): Promise<{ allowed: boolean; remaining: number }> {
+  if (!firestore || !isConfigured) return { allowed: true, remaining: SUPPORT_DAILY_LIMIT };
+
+  const ref = doc(firestore, SUPPORT_LIMITS_COLLECTION, userId);
+  const snap = await getDoc(ref);
+  const today = new Date().toISOString().split('T')[0];
+
+  if (!snap.exists()) {
+    return { allowed: true, remaining: SUPPORT_DAILY_LIMIT };
+  }
+
+  const data = snap.data() as SupportLimit;
+  if (data.windowStart !== today) {
+    // New day — reset
+    return { allowed: true, remaining: SUPPORT_DAILY_LIMIT };
+  }
+
+  const remaining = SUPPORT_DAILY_LIMIT - data.count;
+  return { allowed: remaining > 0, remaining: Math.max(0, remaining) };
+}
+
+/**
+ * Submit a support request and increment the user's daily rate-limit counter.
+ */
+export async function submitSupportRequest(
+  userId: string,
+  data: Omit<SupportRequest, 'userId' | 'createdAt' | 'resolved' | 'resolvedAt'>,
+): Promise<void> {
+  if (!firestore || !isConfigured) return;
+
+  const id = `${userId}-${Date.now()}`;
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date().toISOString();
+
+  const request: SupportRequest = {
+    ...data,
+    userId,
+    createdAt: now,
+    resolved: false,
+    resolvedAt: null,
+  };
+
+  await setDoc(doc(firestore, SUPPORT_COLLECTION, id), request);
+
+  // Update rate-limit counter
+  const limitRef = doc(firestore, SUPPORT_LIMITS_COLLECTION, userId);
+  const limitSnap = await getDoc(limitRef);
+  const limitData = limitSnap.exists() ? (limitSnap.data() as SupportLimit) : null;
+
+  if (!limitData || limitData.windowStart !== today) {
+    await setDoc(limitRef, { count: 1, windowStart: today });
+  } else {
+    await setDoc(limitRef, { count: limitData.count + 1, windowStart: today });
+  }
+}
+
 // ─── Purge All User Data (for account deletion) ─────────────────────────────
 
 export async function purgeAllUserData(userId: string): Promise<void> {

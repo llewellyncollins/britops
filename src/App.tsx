@@ -6,6 +6,7 @@ import { LogOperation } from './pages/LogOperation';
 import { EditOperation } from './pages/EditOperation';
 import { Portfolio } from './pages/Portfolio';
 import { SettingsPage } from './pages/SettingsPage';
+import { SupportPage } from './pages/SupportPage';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { Login } from './pages/Login';
@@ -50,6 +51,7 @@ export default function App() {
             <Route path="/edit/:id" element={<EditOperation />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/support" element={<SupportPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

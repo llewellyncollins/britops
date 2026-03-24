@@ -14,6 +14,8 @@ export const mockGetConsentRecord = vi.fn().mockResolvedValue(null);
 export const mockPurgeAllUserData = vi.fn().mockResolvedValue(undefined);
 export const mockPushUserSettingsToFirestore = vi.fn().mockResolvedValue(undefined);
 export const mockSubscribeToUserSettings = vi.fn(() => vi.fn());
+export const mockCheckSupportRateLimit = vi.fn().mockResolvedValue({ allowed: true, remaining: 3 });
+export const mockSubmitSupportRequest = vi.fn().mockResolvedValue(undefined);
 
 /**
  * Call this in your test file to set up the Firebase Firestore mock.
@@ -37,5 +39,7 @@ export function setupFirestoreMock() {
     purgeAllUserData: mockPurgeAllUserData,
     pushUserSettingsToFirestore: mockPushUserSettingsToFirestore,
     subscribeToUserSettings: mockSubscribeToUserSettings,
+    checkSupportRateLimit: mockCheckSupportRateLimit,
+    submitSupportRequest: mockSubmitSupportRequest,
   };
 }

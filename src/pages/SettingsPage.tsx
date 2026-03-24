@@ -15,7 +15,7 @@ import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManage
 import {
   Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
   LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap, AlertTriangle,
-  Monitor, Sun, Moon,
+  Monitor, Sun, Moon, MessageCircle,
 } from 'lucide-react';
 
 export function SettingsPage() {
@@ -469,6 +469,24 @@ export function SettingsPage() {
           <ExternalLink aria-hidden="true" size={16} className="text-text-muted" />
         </Link>
       </section>
+
+      {/* Support */}
+      {isConfigured && (
+        <section className="space-y-3">
+          <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Support</h2>
+          <Link
+            to="/support"
+            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+          >
+            <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />
+            <div className="text-left flex-1">
+              <p className="font-medium text-sm">Get help or report an issue</p>
+              <p className="text-xs text-text-muted">Report a bug or suggest a new feature</p>
+            </div>
+            <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />
+          </Link>
+        </section>
+      )}
 
       {/* Danger Zone */}
       <section className="space-y-3 border border-danger/30 bg-danger/5 rounded-xl p-4">
