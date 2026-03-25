@@ -219,6 +219,20 @@ All authenticated routes wrapped in `AppShell` (header + BottomNav).
 - **auth.ts** — `signInEmail()`, `signUpEmail()`, `signInGoogle()`, `signOut()`, `deleteAccount()` (purges all Firestore data before deleting auth account), `onAuthChange()`
 - **firestore.ts** — push/subscribe/sync for operations, procedureTypes, and user settings; `migrateLocalOps()` for pre-login data; `saveConsentRecord()` (GDPR consent tracking); `purgeAllUserData()` (GDPR right to erasure)
 
+### Auth-Gated Actions
+
+The following actions require a signed-in user. When triggered while unauthenticated, the user is redirected to `/login?returnTo=<initiating-page>` and returned there after sign-in.
+
+| Action | Location | returnTo |
+|--------|----------|----------|
+| Import from Excel | Settings page | `/settings` |
+| Export to CSV | Settings page | `/settings` |
+| Export Portfolio (Excel) | Settings page | `/settings` |
+| Add custom procedure | Settings > Procedure Types | `/settings` |
+| Request support | Settings > Support | `/support` |
+
+Pattern: inline `if (!user) { navigate('/login?returnTo=...'); return; }` guard in each action handler or button onClick. No wrapper components needed.
+
 ### GDPR & Compliance
 
 - Consent recorded in Firestore (`consentTimestamp`, `privacyPolicyVersion`) on first sign-up

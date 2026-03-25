@@ -107,10 +107,12 @@ export function SettingsPage() {
   }
 
   async function exportXlsx() {
+    if (!user) { navigate('/login?returnTo=/settings'); return; }
     exportPortfolioXlsx(operations, portfolioRows, allProcedures);
   }
 
   async function exportCSV() {
+    if (!user) { navigate('/login?returnTo=/settings'); return; }
     const ops = operations.filter(op => !op.deleted);
     const headers = [
       'Date', 'Patient ID', 'Diagnosis', 'Procedures', 'Involvement',
@@ -424,7 +426,7 @@ export function SettingsPage() {
           className="hidden"
         />
         <button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => { if (!user) { navigate('/login?returnTo=/settings'); return; } fileInputRef.current?.click(); }}
           disabled={importing}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
@@ -474,8 +476,8 @@ export function SettingsPage() {
       {isConfigured && (
         <section className="space-y-3">
           <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Support</h2>
-          <Link
-            to="/support"
+          <button
+            onClick={() => user ? navigate('/support') : navigate('/login?returnTo=/support')}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
             <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -484,7 +486,7 @@ export function SettingsPage() {
               <p className="text-xs text-text-muted">Report a bug or suggest a new feature</p>
             </div>
             <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />
-          </Link>
+          </button>
         </section>
       )}
 

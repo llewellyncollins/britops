@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { signInEmail, signUpEmail, signInGoogle } from '../firebase/auth';
 import { saveConsentRecord } from '../firebase/firestore';
 import { LogIn } from 'lucide-react';
@@ -11,6 +11,11 @@ export function Login() {
   }, []);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = (() => {
+    const p = new URLSearchParams(location.search).get('returnTo');
+    return p && p.startsWith('/') ? p : '/';
+  })();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -34,7 +39,7 @@ export function Login() {
       } else {
         await signInEmail(email, password);
       }
-      navigate('/');
+      navigate(returnTo);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Authentication failed');
     } finally {
@@ -52,7 +57,7 @@ export function Login() {
         consentTimestamp: new Date().toISOString(),
         privacyPolicyVersion: '1.0',
       });
-      navigate('/');
+      navigate(returnTo);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Google sign-in failed');
     }
