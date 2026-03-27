@@ -35,8 +35,8 @@ const BASE_FIELDS: FieldMeta[] = [
     ],
   },
   { key: 'otherDetails', label: 'Other procedure details', type: 'text', placeholder: 'Additional details', colSpan: 2 },
-  { key: 'intraOpComplications', label: 'Intra-op complications', type: 'text', placeholder: 'nil', colSpan: 1 },
-  { key: 'postOpComplications', label: 'Post-op complications', type: 'text', placeholder: 'nil', colSpan: 1 },
+  { key: 'intraOpComplications', label: 'Intra-op complications', type: 'text', placeholder: 'None', colSpan: 1 },
+  { key: 'postOpComplications', label: 'Post-op complications', type: 'text', placeholder: 'None', colSpan: 1 },
   { key: 'followUp', label: 'Requires follow-up', type: 'boolean', required: true, colSpan: 2 },
   { key: 'notes', label: 'Notes', type: 'textarea', placeholder: 'e.g., send OSAT, R0 no concerns', colSpan: 2 },
 ];
@@ -44,7 +44,7 @@ const BASE_FIELDS: FieldMeta[] = [
 // ─── Optional specialty-specific fields ──────────────────────────────────────
 
 const CHEMOTHERAPY_FIELD: FieldMeta = {
-  key: 'chemotherapy', label: 'Chemotherapy / Pre-op notes', type: 'text', placeholder: 'nil, NACT, etc.', colSpan: 2,
+  key: 'chemotherapy', label: 'Chemotherapy / Pre-op notes', type: 'text', placeholder: 'e.g. NACT', colSpan: 2,
 };
 
 const HISTOLOGY_FIELD: FieldMeta = {
