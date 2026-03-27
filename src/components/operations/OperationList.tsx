@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OperationCard } from './OperationCard';
 import { useProcedureTypes } from '../../hooks/useProcedureTypes';
+import { useOperations } from '../../hooks/useOperations';
 import type { OperationEntry } from '../../types';
 import { Search } from 'lucide-react';
 
@@ -13,6 +14,7 @@ export function OperationList({ operations }: Props) {
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
   const { allProcedures } = useProcedureTypes();
+  const { updateOperation } = useOperations();
 
   const filtered = operations.filter(op => {
     if (!search) return true;
@@ -31,6 +33,8 @@ export function OperationList({ operations }: Props) {
     );
   });
 
+  const sorted = [...filtered].sort((a, b) => Number(b.followUp) - Number(a.followUp));
+
   return (
     <div className="space-y-3">
       <div className="relative">
@@ -45,19 +49,20 @@ export function OperationList({ operations }: Props) {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <div className="text-center py-12 text-text-muted">
           <p className="text-lg">No operations found</p>
           <p className="text-sm mt-1">Tap "Log Op" to add your first entry</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map(op => (
+          {sorted.map(op => (
             <OperationCard
               key={op.id}
               operation={op}
               procedures={allProcedures}
               onClick={() => navigate(`/edit/${op.id}`)}
+              onMarkFollowUpDone={() => updateOperation(op.id, { followUp: false })}
             />
           ))}
         </div>

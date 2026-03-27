@@ -1,10 +1,11 @@
 import type { OperationEntry, ProcedureType } from '../../types';
-import { Calendar, User, AlertTriangle } from 'lucide-react';
+import { Calendar, User, AlertTriangle, Clock, CheckCheck } from 'lucide-react';
 
 interface Props {
   operation: OperationEntry;
   procedures: ProcedureType[];
   onClick: () => void;
+  onMarkFollowUpDone?: () => void;
 }
 
 const INVOLVEMENT_COLORS = {
@@ -19,7 +20,7 @@ const INVOLVEMENT_LABELS = {
   independent: 'Independent',
 };
 
-export function OperationCard({ operation, procedures, onClick }: Props) {
+export function OperationCard({ operation, procedures, onClick, onMarkFollowUpDone }: Props) {
   const procMap = new Map(procedures.map(p => [p.id, p]));
   const procedureNames = operation.procedures
     .map(id => procMap.get(id))
@@ -30,9 +31,12 @@ export function OperationCard({ operation, procedures, onClick }: Props) {
     operation.intraOpComplications && operation.intraOpComplications !== 'nil';
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="w-full text-left p-4 bg-surface-raised rounded-xl border border-border hover:border-primary-light transition-colors"
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
+      className="w-full text-left p-4 bg-surface-raised rounded-xl border border-border hover:border-primary-light transition-colors cursor-pointer"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -47,6 +51,12 @@ export function OperationCard({ operation, procedures, onClick }: Props) {
               <>
                 <AlertTriangle aria-hidden="true" size={14} className="text-warning shrink-0" />
                 <span className="sr-only">Has intraoperative complications</span>
+              </>
+            )}
+            {operation.followUp && (
+              <>
+                <Clock aria-hidden="true" size={14} className="text-accent shrink-0" />
+                <span className="sr-only">Requires follow-up</span>
               </>
             )}
           </div>
@@ -67,6 +77,22 @@ export function OperationCard({ operation, procedures, onClick }: Props) {
           <span>{operation.patientId}</span>
         </div>
       )}
-    </button>
+      {operation.followUp && onMarkFollowUpDone && (
+        <div className="mt-2 pt-2 border-t border-border flex items-center justify-between">
+          <span className="text-xs font-medium text-accent flex items-center gap-1">
+            <Clock size={12} aria-hidden="true" />
+            Follow-up pending
+          </span>
+          <button
+            onClick={e => { e.stopPropagation(); onMarkFollowUpDone(); }}
+            className="flex items-center gap-1 text-xs font-medium text-success hover:text-success/80 transition-colors"
+            aria-label="Mark follow-up as done"
+          >
+            <CheckCheck size={12} aria-hidden="true" />
+            Mark done
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
