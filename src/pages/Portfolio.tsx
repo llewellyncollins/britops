@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useOperations } from '../hooks/useOperations';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useProcedureTypes } from '../hooks/useProcedureTypes';
@@ -11,10 +11,17 @@ export function Portfolio() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [filterSpecialty, setFilterSpecialty] = useState('');
+  const [filterGrade, setFilterGrade] = useState('');
+
+  const availableGrades = useMemo(() => {
+    const grades = new Set(operations.filter(op => !op.deleted && op.grade).map(op => op.grade));
+    return [...grades].sort();
+  }, [operations]);
 
   const filtered = operations.filter(op => {
     if (dateFrom && op.date < dateFrom) return false;
     if (dateTo && op.date > dateTo) return false;
+    if (filterGrade && op.grade !== filterGrade) return false;
     return true;
   });
 
@@ -62,22 +69,42 @@ export function Portfolio() {
         </span>
       </div>
 
-      {/* Specialty filter */}
-      <div className="mb-4">
-        <label htmlFor="portfolio-specialty" className="block text-sm font-medium text-text mb-1">
-          Filter by specialty
-        </label>
-        <select
-          id="portfolio-specialty"
-          value={filterSpecialty}
-          onChange={e => setFilterSpecialty(e.target.value)}
-          className="input text-sm"
-        >
-          <option value="">All specialties</option>
-          {specialties.map(sp => (
-            <option key={sp} value={sp}>{sp}</option>
-          ))}
-        </select>
+      {/* Specialty + Grade filters */}
+      <div className="flex gap-3 mb-4 flex-wrap">
+        <div className="flex-1 min-w-40">
+          <label htmlFor="portfolio-specialty" className="block text-sm font-medium text-text mb-1">
+            Specialty
+          </label>
+          <select
+            id="portfolio-specialty"
+            value={filterSpecialty}
+            onChange={e => setFilterSpecialty(e.target.value)}
+            className="input text-sm"
+          >
+            <option value="">All specialties</option>
+            {specialties.map(sp => (
+              <option key={sp} value={sp}>{sp}</option>
+            ))}
+          </select>
+        </div>
+        {availableGrades.length > 0 && (
+          <div className="flex-1 min-w-40">
+            <label htmlFor="portfolio-grade" className="block text-sm font-medium text-text mb-1">
+              Grade
+            </label>
+            <select
+              id="portfolio-grade"
+              value={filterGrade}
+              onChange={e => setFilterGrade(e.target.value)}
+              className="input text-sm"
+            >
+              <option value="">All grades</option>
+              {availableGrades.map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <PortfolioSummary rows={rows} filterSpecialty={filterSpecialty || undefined} />
