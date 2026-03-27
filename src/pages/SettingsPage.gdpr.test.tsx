@@ -112,17 +112,11 @@ describe('SettingsPage — GDPR features', () => {
     });
   });
 
-  describe('consent checkbox in inline sign-up', () => {
-    it('shows consent checkbox when inline sign-up form is in sign-up mode', async () => {
+  describe('sign-in redirect', () => {
+    it('shows a sign-in redirect button when not authenticated', () => {
       renderWithProviders(<SettingsPage />, { route: '/settings' });
 
-      // Open the login form
-      fireEvent.click(screen.getByText('Sign in to enable sync'));
-
-      // Switch to sign-up mode
-      fireEvent.click(screen.getByText('Create one'));
-
-      expect(screen.getByRole('checkbox')).toBeInTheDocument();
+      expect(screen.getByText('Sign in to enable sync')).toBeInTheDocument();
     });
   });
 
