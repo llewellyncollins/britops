@@ -1,10 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useOperations } from '../hooks/useOperations';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useProcedureTypes } from '../hooks/useProcedureTypes';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { PortfolioSummary } from '../components/portfolio/PortfolioSummary';
 import { Calendar, ChevronDown } from 'lucide-react';
+import {
+  trackPageView,
+  trackPortfolioDateFilterApplied,
+  trackPortfolioDateFilterCleared,
+  trackPortfolioSpecialtyFiltered,
+  trackPortfolioGradeFiltered,
+  trackPortfolioSectionToggled,
+} from '../firebase/analytics';
 
 export function Portfolio() {
   const { operations } = useOperations();
@@ -19,6 +27,8 @@ export function Portfolio() {
   const [dateTo, setDateTo] = useState('');
   const [filterSpecialty, setFilterSpecialty] = useState('');
   const [filterGrade, setFilterGrade] = useState('');
+
+  useEffect(() => { trackPageView({ page_name: 'Portfolio' }); }, []);
 
   const availableGrades = useMemo(() => {
     const grades = new Set(operations.filter(op => !op.deleted && op.grade).map(op => op.grade));
@@ -77,7 +87,7 @@ export function Portfolio() {
           id="date-from"
           type="date"
           value={dateFrom}
-          onChange={e => setDateFrom(e.target.value)}
+          onChange={e => { setDateFrom(e.target.value); trackPortfolioDateFilterApplied({ has_from: !!e.target.value, has_to: !!dateTo }); }}
           className="input !w-auto text-sm"
         />
         <span className="text-text text-sm shrink-0">to</span>
@@ -86,12 +96,12 @@ export function Portfolio() {
           id="date-to"
           type="date"
           value={dateTo}
-          onChange={e => setDateTo(e.target.value)}
+          onChange={e => { setDateTo(e.target.value); trackPortfolioDateFilterApplied({ has_from: !!dateFrom, has_to: !!e.target.value }); }}
           className="input !w-auto text-sm"
         />
         {(dateFrom || dateTo) && (
           <button
-            onClick={() => { setDateFrom(''); setDateTo(''); }}
+            onClick={() => { setDateFrom(''); setDateTo(''); trackPortfolioDateFilterCleared(); }}
             className="text-xs text-accent hover:underline shrink-0"
             aria-label="Clear date filters"
           >
@@ -115,7 +125,7 @@ export function Portfolio() {
           <select
             id="portfolio-specialty"
             value={filterSpecialty}
-            onChange={e => setFilterSpecialty(e.target.value)}
+            onChange={e => { setFilterSpecialty(e.target.value); trackPortfolioSpecialtyFiltered({ has_filter: !!e.target.value }); }}
             className="input text-sm"
           >
             <option value="">All specialties</option>
@@ -132,7 +142,7 @@ export function Portfolio() {
             <select
               id="portfolio-grade"
               value={filterGrade}
-              onChange={e => setFilterGrade(e.target.value)}
+              onChange={e => { setFilterGrade(e.target.value); trackPortfolioGradeFiltered({ has_filter: !!e.target.value }); }}
               className="input text-sm"
             >
               <option value="">All grades</option>
@@ -147,7 +157,7 @@ export function Portfolio() {
       {/* KPI Cards */}
       <section className="mb-4 border border-border rounded-lg overflow-hidden">
         <button
-          onClick={() => setPortfolioShowKpis(!portfolioShowKpis)}
+          onClick={() => { trackPortfolioSectionToggled({ section: 'overview', open: !portfolioShowKpis }); setPortfolioShowKpis(!portfolioShowKpis); }}
           aria-expanded={portfolioShowKpis}
           className="w-full flex items-center justify-between px-3 py-2.5 bg-surface-raised text-sm font-semibold text-text hover:bg-surface transition-colors"
         >
@@ -178,7 +188,7 @@ export function Portfolio() {
       {/* Cases Over Time */}
       <section className="mb-4 border border-border rounded-lg overflow-hidden">
         <button
-          onClick={() => setPortfolioShowTimeline(!portfolioShowTimeline)}
+          onClick={() => { trackPortfolioSectionToggled({ section: 'activity', open: !portfolioShowTimeline }); setPortfolioShowTimeline(!portfolioShowTimeline); }}
           aria-expanded={portfolioShowTimeline}
           className="w-full flex items-center justify-between px-3 py-2.5 bg-surface-raised text-sm font-semibold text-text hover:bg-surface transition-colors"
         >
@@ -217,7 +227,7 @@ export function Portfolio() {
       {totalOps > 0 && (
         <section className="mb-4 border border-border rounded-lg overflow-hidden">
           <button
-            onClick={() => setPortfolioShowInvolvement(!portfolioShowInvolvement)}
+            onClick={() => { trackPortfolioSectionToggled({ section: 'involvement', open: !portfolioShowInvolvement }); setPortfolioShowInvolvement(!portfolioShowInvolvement); }}
             aria-expanded={portfolioShowInvolvement}
             className="w-full flex items-center justify-between px-3 py-2.5 bg-surface-raised text-sm font-semibold text-text hover:bg-surface transition-colors"
           >

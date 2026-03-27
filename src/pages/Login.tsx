@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { signInEmail, signUpEmail, signInGoogle } from '../firebase/auth';
 import { saveConsentRecord } from '../firebase/firestore';
+import { trackSignIn, trackSignUp, trackPageView } from '../firebase/analytics';
 import { LogIn, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export function Login() {
   useEffect(() => {
     document.title = 'Sign in — Theatrelog';
+    trackPageView({ page_name: 'Login' });
     return () => { document.title = 'Theatrelog'; };
   }, []);
 
@@ -44,8 +46,10 @@ export function Login() {
           consentTimestamp: new Date().toISOString(),
           privacyPolicyVersion: '1.0',
         });
+        trackSignUp({ method: 'email' });
       } else {
         await signInEmail(email, password);
+        trackSignIn({ method: 'email' });
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Authentication failed');
@@ -64,6 +68,7 @@ export function Login() {
         consentTimestamp: new Date().toISOString(),
         privacyPolicyVersion: '1.0',
       });
+      trackSignIn({ method: 'google' });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message.replace('Firebase: ', '') : 'Google sign-in failed');
       setLoading(false);

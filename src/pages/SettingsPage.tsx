@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../db/dexie';
 import { useOperations } from '../hooks/useOperations';
@@ -10,6 +10,23 @@ import { TRAINEE_GRADES } from '../data/grades';
 import { exportPortfolioXlsx, importFromXlsx } from '../utils/excel';
 import { exportAllDataJson } from '../utils/export';
 import { signOut, deleteAccount } from '../firebase/auth';
+import {
+  trackSignOut,
+  trackSignInPrompted,
+  trackThemeChanged,
+  trackGradeSet,
+  trackSpecialtySet,
+  trackProcedureTypesOpened,
+  trackExport,
+  trackImport,
+  trackDataCleared,
+  trackAccountDeleteInitiated,
+  trackAccountDeleteConfirmed,
+  trackSupportOpened,
+  trackPrivacyPolicyViewed,
+  trackTermsViewed,
+  trackPageView,
+} from '../firebase/analytics';
 import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManager';
 import {
   Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
@@ -27,6 +44,8 @@ export function SettingsPage() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState('');
   const [showProcedures, setShowProcedures] = useState(false);
+
+  useEffect(() => { trackPageView({ page_name: 'Settings' }); }, []);
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -35,8 +54,10 @@ export function SettingsPage() {
   async function handleDeleteAccount() {
     if (deleteConfirmStep === 0) {
       setDeleteConfirmStep(1);
+      trackAccountDeleteInitiated();
       return;
     }
+    trackAccountDeleteConfirmed();
     setDeleting(true);
     setDeleteError('');
     try {
@@ -55,12 +76,13 @@ export function SettingsPage() {
   }
 
   async function exportXlsx() {
-    if (!user) { navigate('/login?returnTo=/settings'); return; }
+    if (!user) { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'export' }); return; }
     exportPortfolioXlsx(operations, portfolioRows, allProcedures);
+    trackExport({ format: 'xlsx' });
   }
 
   async function exportCSV() {
-    if (!user) { navigate('/login?returnTo=/settings'); return; }
+    if (!user) { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'export' }); return; }
     const ops = operations.filter(op => !op.deleted);
     const headers = [
       'Date', 'Patient ID', 'Diagnosis', 'Procedures', 'Involvement',
@@ -90,6 +112,7 @@ export function SettingsPage() {
     a.download = `theatrelog-export-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    trackExport({ format: 'csv' });
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -105,6 +128,7 @@ export function SettingsPage() {
         count++;
       }
       setImportResult(`Imported ${count} operations successfully`);
+      trackImport({ row_count: count });
     } catch (err: unknown) {
       setImportResult(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
@@ -116,6 +140,7 @@ export function SettingsPage() {
   async function clearData() {
     if (confirm('Are you sure? This will delete all local operations.')) {
       await db.operations.clear();
+      trackDataCleared();
     }
   }
 
@@ -136,7 +161,7 @@ export function SettingsPage() {
             ] as const).map(({ value, label, Icon }) => (
               <button
                 key={value}
-                onClick={() => setTheme(value)}
+                onClick={() => { setTheme(value); trackThemeChanged({ theme: value }); }}
                 aria-pressed={theme === value}
                 className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-colors ${
                   theme === value
@@ -164,7 +189,7 @@ export function SettingsPage() {
                 <select
                   id="settings-grade"
                   value={grade ?? ''}
-                  onChange={e => setGrade(e.target.value || null)}
+                  onChange={e => { setGrade(e.target.value || null); trackGradeSet({ has_grade: !!e.target.value }); }}
                   className="input"
                 >
                   <option value="">Not set</option>
@@ -187,7 +212,7 @@ export function SettingsPage() {
               id="settings-specialty"
               aria-labelledby="settings-specialty-label"
               value={specialty ?? ''}
-              onChange={e => setSpecialty(e.target.value || null)}
+              onChange={e => { setSpecialty(e.target.value || null); trackSpecialtySet({ has_specialty: !!e.target.value }); }}
               className="input"
             >
               <option value="">Not set (show all fields)</option>
@@ -216,7 +241,7 @@ export function SettingsPage() {
                 </div>
               </div>
               <button
-                onClick={() => signOut()}
+                onClick={() => { signOut(); trackSignOut(); }}
                 className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text-muted hover:text-danger hover:border-danger transition-colors"
               >
                 <LogOut aria-hidden="true" size={16} />
@@ -225,7 +250,7 @@ export function SettingsPage() {
             </div>
           ) : (
             <button
-              onClick={() => navigate('/login?returnTo=/settings')}
+              onClick={() => { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'settings' }); }}
               className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
             >
               <LogIn aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -241,7 +266,7 @@ export function SettingsPage() {
       {/* Procedure Types */}
       <section className="space-y-3">
         <button
-          onClick={() => setShowProcedures(!showProcedures)}
+          onClick={() => { if (!showProcedures) trackProcedureTypesOpened(); setShowProcedures(!showProcedures); }}
           aria-expanded={showProcedures}
           aria-controls="settings-procedures-panel"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
@@ -290,7 +315,7 @@ export function SettingsPage() {
 
         {user && (
           <button
-            onClick={() => exportAllDataJson(user.uid)}
+            onClick={() => { exportAllDataJson(user.uid); trackExport({ format: 'json' }); }}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
             <FileJson aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -314,7 +339,7 @@ export function SettingsPage() {
           className="hidden"
         />
         <button
-          onClick={() => { if (!user) { navigate('/login?returnTo=/settings'); return; } fileInputRef.current?.click(); }}
+          onClick={() => { if (!user) { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'import' }); return; } fileInputRef.current?.click(); }}
           disabled={importing}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
@@ -337,6 +362,7 @@ export function SettingsPage() {
 
         <Link
           to="/privacy"
+          onClick={() => trackPrivacyPolicyViewed()}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
           <Shield aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -349,6 +375,7 @@ export function SettingsPage() {
 
         <Link
           to="/terms"
+          onClick={() => trackTermsViewed()}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
           <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -365,7 +392,7 @@ export function SettingsPage() {
         <section className="space-y-3">
           <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Support</h2>
           <button
-            onClick={() => user ? navigate('/support') : navigate('/login?returnTo=/support')}
+            onClick={() => { trackSupportOpened(); navigate(user ? '/support' : '/login?returnTo=/support'); }}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
             <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />

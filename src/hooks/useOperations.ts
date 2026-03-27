@@ -3,6 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db/dexie';
 import { useAuth } from './useAuth';
 import type { OperationEntry } from '../types';
+import {
+  trackOperationLogged,
+  trackOperationUpdated,
+  trackOperationDeleted,
+} from '../firebase/analytics';
 
 export function useOperations() {
   const { user } = useAuth();
@@ -29,16 +34,29 @@ export function useOperations() {
       deletedAt: null,
     };
     await db.operations.add(entry);
+    trackOperationLogged({
+      involvement: entry.involvement,
+      procedure_count: entry.procedures.length,
+      has_complications: !!(entry.intraOpComplications || entry.postOpComplications),
+      discussed_mdt: entry.discussedMDT,
+      has_complexity_score: entry.complexityScore !== null,
+      has_pci: entry.pci !== null,
+    });
     return entry;
   }
 
   async function updateOperation(id: string, data: Partial<OperationEntry>) {
     await db.operations.update(id, { ...data, updatedAt: new Date().toISOString() });
+    trackOperationUpdated({
+      involvement: data.involvement ?? 'unknown',
+      procedure_count: (data.procedures ?? []).length,
+    });
   }
 
   async function deleteOperation(id: string) {
     const now = new Date().toISOString();
     await db.operations.update(id, { deleted: true, deletedAt: now, updatedAt: now });
+    trackOperationDeleted();
   }
 
   return { operations: operations ?? [], addOperation, updateOperation, deleteOperation };

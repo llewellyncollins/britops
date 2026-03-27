@@ -1,8 +1,11 @@
+import { useEffect } from 'react';
 import { useOperations } from '../hooks/useOperations';
 import { OperationList } from '../components/operations/OperationList';
+import { trackPageView } from '../firebase/analytics';
 
 export function Dashboard() {
   const { operations } = useOperations();
+  useEffect(() => { trackPageView({ page_name: 'Dashboard' }); }, []);
 
   return (
     <div className="p-4 max-w-lg mx-auto">

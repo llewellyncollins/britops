@@ -14,11 +14,23 @@ import { useAuth } from './hooks/useAuth';
 import { useSync } from './hooks/useSync';
 import { SyncProvider } from './context/SyncContext';
 import { useSettingsStore } from './stores/useSettingsStore';
+import { setAnalyticsUserProperties } from './firebase/analytics';
 
 export default function App() {
   const { user } = useAuth();
   const { syncing } = useSync(user);
   const theme = useSettingsStore((s) => s.theme);
+  const specialty = useSettingsStore((s) => s.specialty);
+  const grade = useSettingsStore((s) => s.grade);
+
+  useEffect(() => {
+    if (user) {
+      setAnalyticsUserProperties({
+        specialty: specialty ?? 'not_set',
+        grade: grade ?? 'not_set',
+      });
+    }
+  }, [user, specialty, grade]);
 
   useEffect(() => {
     const html = document.documentElement;
