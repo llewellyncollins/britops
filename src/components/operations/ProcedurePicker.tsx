@@ -65,7 +65,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
   return (
     <div ref={ref} className="relative">
       <label htmlFor={TRIGGER_ID} className="block text-sm font-medium text-text mb-1">
-        Procedures
+        Procedures<span aria-hidden="true" className="text-danger ml-0.5">*</span>
       </label>
 
       {/* Selected chips + open trigger */}
