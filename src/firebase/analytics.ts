@@ -168,6 +168,23 @@ export function trackPortfolioSectionToggled(params: {
   track('portfolio_section_toggled', params);
 }
 
+// ─── Upgrade / Tier ──────────────────────────────────────────────────────────
+
+export function trackUpgradePrompted(params: {
+  source: string;
+  required_tier: string;
+}) {
+  track('upgrade_prompted', params);
+}
+
+export function trackUpgradePageViewed() {
+  track('upgrade_page_viewed');
+}
+
+export function trackCheckoutStarted(params: { plan: 'monthly' | 'annual' }) {
+  track('checkout_started', params);
+}
+
 // ─── Page views ───────────────────────────────────────────────────────────────
 
 export function trackPageView(params: {
@@ -188,6 +205,7 @@ export function trackPageView(params: {
 export function setAnalyticsUserProperties(params: {
   specialty: string;
   grade: string;
+  tier?: string;
 }) {
   try {
     const a = getAnalyticsInstance();

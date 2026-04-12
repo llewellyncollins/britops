@@ -6,11 +6,13 @@ import { LogOperation } from './pages/LogOperation';
 import { EditOperation } from './pages/EditOperation';
 import { Portfolio } from './pages/Portfolio';
 import { SettingsPage } from './pages/SettingsPage';
+import { UpgradePage } from './pages/UpgradePage';
 import { SupportPage } from './pages/SupportPage';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { Login } from './pages/Login';
 import { useAuth } from './hooks/useAuth';
+import { useTier } from './hooks/useTier';
 import { useSync } from './hooks/useSync';
 import { SyncProvider } from './context/SyncContext';
 import { useSettingsStore } from './stores/useSettingsStore';
@@ -18,7 +20,8 @@ import { setAnalyticsUserProperties } from './firebase/analytics';
 
 export default function App() {
   const { user } = useAuth();
-  const { syncing } = useSync(user);
+  const { tier } = useTier();
+  const { syncing } = useSync(user, tier);
   const theme = useSettingsStore((s) => s.theme);
   const specialty = useSettingsStore((s) => s.specialty);
   const grade = useSettingsStore((s) => s.grade);
@@ -28,9 +31,10 @@ export default function App() {
       setAnalyticsUserProperties({
         specialty: specialty ?? 'not_set',
         grade: grade ?? 'not_set',
+        tier,
       });
     }
-  }, [user, specialty, grade]);
+  }, [user, specialty, grade, tier]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -63,6 +67,7 @@ export default function App() {
             <Route path="/edit/:id" element={<EditOperation />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/upgrade" element={<UpgradePage />} />
             <Route path="/support" element={<SupportPage />} />
           </Route>
         </Routes>

@@ -43,18 +43,25 @@ describe('SettingsPage — GDPR features', () => {
       expect(screen.queryByText(/Delete Account/)).not.toBeInTheDocument();
     });
 
-    it('does not show JSON export button', () => {
+    it('shows JSON export button behind locked overlay', () => {
       renderWithProviders(<SettingsPage />, { route: '/settings' });
 
-      expect(screen.queryByText(/Export All My Data/)).not.toBeInTheDocument();
+      // LockedFeature renders the content with reduced opacity + lock overlay
+      expect(screen.getByText(/Export All My Data/)).toBeInTheDocument();
     });
   });
 
   describe('when signed in', () => {
+    const mockUser = {
+      uid: 'test-uid-123',
+      email: 'test@example.com',
+      getIdTokenResult: vi.fn().mockResolvedValue({ claims: {} }),
+    };
+
     async function renderSignedIn() {
       renderWithProviders(<SettingsPage />, { route: '/settings' });
       // Trigger auth after render so the onAuthChange callback is registered
-      triggerAuthChange({ uid: 'test-uid-123', email: 'test@example.com' });
+      triggerAuthChange(mockUser);
       await waitFor(() => {
         expect(screen.getByText('Delete Account & All Data')).toBeInTheDocument();
       });
@@ -65,7 +72,7 @@ describe('SettingsPage — GDPR features', () => {
       expect(screen.getByText('Delete Account & All Data')).toBeInTheDocument();
     });
 
-    it('shows JSON export button', async () => {
+    it('shows JSON export button (locked behind Pro)', async () => {
       await renderSignedIn();
       expect(screen.getByText('Export All My Data (JSON)')).toBeInTheDocument();
     });
@@ -116,7 +123,8 @@ describe('SettingsPage — GDPR features', () => {
     it('shows a sign-in redirect button when not authenticated', () => {
       renderWithProviders(<SettingsPage />, { route: '/settings' });
 
-      expect(screen.getByText('Sign in to enable sync')).toBeInTheDocument();
+      // The Account section has a "Sign in" button (separate from LockedFeature overlays)
+      expect(screen.getByText('Unlock imports, support, and more')).toBeInTheDocument();
     });
   });
 

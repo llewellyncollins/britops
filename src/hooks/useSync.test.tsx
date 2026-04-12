@@ -3,6 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import type { User } from 'firebase/auth';
 import { db } from '../db/dexie';
 import { createOperation } from '../test/factories';
+import type { UserTier } from '../types';
 
 // ── Firebase SDK mock ────────────────────────────────────────────────────────
 // We mock only the *Firebase SDK*, not our firestore.ts wrapper, so the
@@ -85,7 +86,7 @@ describe('useSync — online push on create', () => {
   });
 
   it('pushes new operation to Firestore and flips syncPending to false', async () => {
-    const { unmount } = renderHook(() => useSync(mockUser));
+    const { unmount } = renderHook(() => useSync(mockUser, 'paid'));
 
     // Allow effects to run and hooks to register, and Effect 2 (migrate + pushPending) to fully settle
     await act(async () => {
@@ -119,7 +120,7 @@ describe('useSync — online push on create', () => {
   });
 
   it('strips syncPending field from Firestore payload', async () => {
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -138,7 +139,7 @@ describe('useSync — online push on create', () => {
   });
 
   it('does not push when user is not signed in', async () => {
-    renderHook(() => useSync(null));
+    renderHook(() => useSync(null, 'free'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -173,7 +174,7 @@ describe('useSync — offline behaviour', () => {
 
   it('does not attempt push when offline — syncPending stays true', async () => {
     setOnline(false);
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -193,7 +194,7 @@ describe('useSync — offline behaviour', () => {
 
   it('pushes all pending ops when online event fires', async () => {
     setOnline(false);
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -266,7 +267,7 @@ describe('useSync — push failure & retry', () => {
     });
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -304,7 +305,7 @@ describe('useSync — push failure & retry', () => {
     });
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -360,7 +361,7 @@ describe('useSync — updates', () => {
     });
     await db.operations.add(op);
 
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -382,7 +383,7 @@ describe('useSync — updates', () => {
   });
 
   it('does NOT re-push on bookkeeping-only syncPending update (loop prevention)', async () => {
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -420,7 +421,7 @@ describe('useSync — isSyncingFromFirestore loop prevention', () => {
   });
 
   it('does not push ops written by syncFromFirestore (remote → local)', async () => {
-    renderHook(() => useSync(mockUser));
+    renderHook(() => useSync(mockUser, 'paid'));
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
 
@@ -480,16 +481,16 @@ describe('useSync — sign-in recovery', () => {
     ]);
 
     const { rerender } = renderHook(
-      ({ user }: { user: User | null }) => useSync(user),
-      { initialProps: { user: null as User | null } },
+      ({ user, tier }: { user: User | null; tier: 'free' | 'signed-in' | 'paid' }) => useSync(user, tier),
+      { initialProps: { user: null as User | null, tier: 'free' as UserTier } },
     );
 
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     setDocMock.mockClear();
     expect(opPushCalls()).toHaveLength(0);
 
-    // Sign in
-    rerender({ user: mockUser });
+    // Sign in with paid tier
+    rerender({ user: mockUser, tier: 'paid' });
 
     await waitForPushes(1);
 

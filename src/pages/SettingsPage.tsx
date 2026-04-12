@@ -5,6 +5,7 @@ import { useOperations } from '../hooks/useOperations';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useProcedureTypes } from '../hooks/useProcedureTypes';
 import { useAuth } from '../hooks/useAuth';
+import { useTier } from '../hooks/useTier';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { TRAINEE_GRADES } from '../data/grades';
 import { exportPortfolioXlsx, importFromXlsx } from '../utils/excel';
@@ -28,10 +29,12 @@ import {
   trackPageView,
 } from '../firebase/analytics';
 import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManager';
+import { LockedFeature } from '../components/common/LockedFeature';
+import { TierBadge } from '../components/common/TierBadge';
 import {
   Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
   LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap, AlertTriangle,
-  Monitor, Sun, Moon, MessageCircle,
+  Monitor, Sun, Moon, MessageCircle, CreditCard,
 } from 'lucide-react';
 
 export function SettingsPage() {
@@ -41,6 +44,7 @@ export function SettingsPage() {
   const { specialty, setSpecialty, grade, setGrade, theme, setTheme } = useSettingsStore();
   const portfolioRows = usePortfolio(operations, allProcedures);
   const { user, isConfigured } = useAuth();
+  const { tier, can } = useTier();
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState('');
   const [showProcedures, setShowProcedures] = useState(false);
@@ -76,13 +80,13 @@ export function SettingsPage() {
   }
 
   async function exportXlsx() {
-    if (!user) { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'export' }); return; }
+    if (!can('exportXlsx')) return;
     exportPortfolioXlsx(operations, portfolioRows, allProcedures);
     trackExport({ format: 'xlsx' });
   }
 
   async function exportCSV() {
-    if (!user) { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'export' }); return; }
+    if (!can('exportCsv')) return;
     const ops = operations.filter(op => !op.deleted);
     const headers = [
       'Date', 'Patient ID', 'Diagnosis', 'Procedures', 'Involvement',
@@ -180,51 +184,55 @@ export function SettingsPage() {
       {/* Clinical Profile */}
       <section className="space-y-3">
         <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Clinical Profile</h2>
-        <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
-          <div className="flex items-start gap-3">
-            <Stethoscope aria-hidden="true" size={20} className="text-accent mt-2 shrink-0" />
-            <div className="flex-1 space-y-3">
-              <div>
-                <label htmlFor="settings-grade" className="block text-sm font-medium text-text mb-1">Trainee grade</label>
-                <select
-                  id="settings-grade"
-                  value={grade ?? ''}
-                  onChange={e => { setGrade(e.target.value || null); trackGradeSet({ has_grade: !!e.target.value }); }}
-                  className="input"
-                >
-                  <option value="">Not set</option>
-                  {TRAINEE_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+        <LockedFeature feature="gradeSetting">
+          <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
+            <div className="flex items-start gap-3">
+              <Stethoscope aria-hidden="true" size={20} className="text-accent mt-2 shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div>
+                  <label htmlFor="settings-grade" className="block text-sm font-medium text-text mb-1">Trainee grade</label>
+                  <select
+                    id="settings-grade"
+                    value={grade ?? ''}
+                    onChange={e => { setGrade(e.target.value || null); trackGradeSet({ has_grade: !!e.target.value }); }}
+                    className="input"
+                  >
+                    <option value="">Not set</option>
+                    {TRAINEE_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+                <p className="text-xs text-text-muted">Pre-fills grade on each new operation you log</p>
               </div>
-              <p className="text-xs text-text-muted">Pre-fills grade on each new operation you log</p>
             </div>
           </div>
-        </div>
+        </LockedFeature>
       </section>
 
       {/* Specialty */}
       <section className="space-y-3">
         <h2 id="settings-specialty-label" className="font-semibold text-text text-sm uppercase tracking-wide">Your Specialty</h2>
-        <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-          <GraduationCap aria-hidden="true" size={20} className="text-accent shrink-0" />
-          <div className="flex-1">
-            <select
-              id="settings-specialty"
-              aria-labelledby="settings-specialty-label"
-              value={specialty ?? ''}
-              onChange={e => { setSpecialty(e.target.value || null); trackSpecialtySet({ has_specialty: !!e.target.value }); }}
-              className="input"
-            >
-              <option value="">Not set (show all fields)</option>
-              {specialties.map(sp => (
-                <option key={sp} value={sp}>{sp}</option>
-              ))}
-            </select>
-            <p className="text-xs text-text-muted mt-1">
-              Tailors the operation form to show fields relevant to your specialty
-            </p>
+        <LockedFeature feature="specialtySetting">
+          <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
+            <GraduationCap aria-hidden="true" size={20} className="text-accent shrink-0" />
+            <div className="flex-1">
+              <select
+                id="settings-specialty"
+                aria-labelledby="settings-specialty-label"
+                value={specialty ?? ''}
+                onChange={e => { setSpecialty(e.target.value || null); trackSpecialtySet({ has_specialty: !!e.target.value }); }}
+                className="input"
+              >
+                <option value="">Not set (show all fields)</option>
+                {specialties.map(sp => (
+                  <option key={sp} value={sp}>{sp}</option>
+                ))}
+              </select>
+              <p className="text-xs text-text-muted mt-1">
+                Tailors the operation form to show fields relevant to your specialty
+              </p>
+            </div>
           </div>
-        </div>
+        </LockedFeature>
       </section>
 
       {/* Account */}
@@ -236,10 +244,35 @@ export function SettingsPage() {
               <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
                 <User aria-hidden="true" size={20} className="text-accent shrink-0" />
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
-                  <p className="text-xs text-text-muted">Syncing enabled</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
+                    <TierBadge tier={tier} />
+                  </div>
+                  {tier === 'paid' ? (
+                    <p className="text-xs text-success">Syncing enabled</p>
+                  ) : (
+                    <p className="text-xs text-text-muted">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/upgrade')}
+                        className="text-accent hover:underline"
+                      >
+                        Upgrade to Pro
+                      </button>
+                      {' '}to enable cloud sync
+                    </p>
+                  )}
                 </div>
               </div>
+              {tier === 'paid' && (
+                <button
+                  onClick={() => navigate('/upgrade')}
+                  className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text-muted hover:text-accent hover:border-accent transition-colors"
+                >
+                  <CreditCard aria-hidden="true" size={16} />
+                  Manage subscription
+                </button>
+              )}
               <button
                 onClick={() => { signOut(); trackSignOut(); }}
                 className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text-muted hover:text-danger hover:border-danger transition-colors"
@@ -255,8 +288,8 @@ export function SettingsPage() {
             >
               <LogIn aria-hidden="true" size={20} className="text-accent shrink-0" />
               <div className="text-left">
-                <p className="font-medium text-sm">Sign in to enable sync</p>
-                <p className="text-xs text-text-muted">Back up and sync your logbook across devices</p>
+                <p className="font-medium text-sm">Sign in</p>
+                <p className="text-xs text-text-muted">Unlock imports, support, and more</p>
               </div>
             </button>
           )}
@@ -291,31 +324,35 @@ export function SettingsPage() {
       <section className="space-y-3">
         <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Export</h2>
 
-        <button
-          onClick={exportXlsx}
-          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-        >
-          <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
-          <div className="text-left">
-            <p className="font-medium text-sm">Export Portfolio (Excel)</p>
-            <p className="text-xs text-text-muted">Download as .xlsx with summary + log</p>
-          </div>
-        </button>
-
-        <button
-          onClick={exportCSV}
-          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-        >
-          <Download aria-hidden="true" size={20} className="text-accent shrink-0" />
-          <div className="text-left">
-            <p className="font-medium text-sm">Export to CSV</p>
-            <p className="text-xs text-text-muted">Download all operations as CSV</p>
-          </div>
-        </button>
-
-        {user && (
+        <LockedFeature feature="exportXlsx">
           <button
-            onClick={() => { exportAllDataJson(user.uid); trackExport({ format: 'json' }); }}
+            onClick={exportXlsx}
+            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+          >
+            <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
+            <div className="text-left">
+              <p className="font-medium text-sm">Export Portfolio (Excel)</p>
+              <p className="text-xs text-text-muted">Download as .xlsx with summary + log</p>
+            </div>
+          </button>
+        </LockedFeature>
+
+        <LockedFeature feature="exportCsv">
+          <button
+            onClick={exportCSV}
+            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+          >
+            <Download aria-hidden="true" size={20} className="text-accent shrink-0" />
+            <div className="text-left">
+              <p className="font-medium text-sm">Export to CSV</p>
+              <p className="text-xs text-text-muted">Download all operations as CSV</p>
+            </div>
+          </button>
+        </LockedFeature>
+
+        <LockedFeature feature="exportJson">
+          <button
+            onClick={() => { if (user) { exportAllDataJson(user.uid); trackExport({ format: 'json' }); } }}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
             <FileJson aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -324,7 +361,7 @@ export function SettingsPage() {
               <p className="text-xs text-text-muted">Complete data export for GDPR portability</p>
             </div>
           </button>
-        )}
+        </LockedFeature>
       </section>
 
       {/* Import */}
@@ -338,17 +375,19 @@ export function SettingsPage() {
           onChange={handleImport}
           className="hidden"
         />
-        <button
-          onClick={() => { if (!user) { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'import' }); return; } fileInputRef.current?.click(); }}
-          disabled={importing}
-          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-        >
-          <Upload aria-hidden="true" size={20} className="text-accent shrink-0" />
-          <div className="text-left">
-            <p className="font-medium text-sm">{importing ? 'Importing...' : 'Import from Excel'}</p>
-            <p className="text-xs text-text-muted">Import operations from .xlsx logbook</p>
-          </div>
-        </button>
+        <LockedFeature feature="import">
+          <button
+            onClick={() => { if (can('import')) fileInputRef.current?.click(); }}
+            disabled={importing}
+            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+          >
+            <Upload aria-hidden="true" size={20} className="text-accent shrink-0" />
+            <div className="text-left">
+              <p className="font-medium text-sm">{importing ? 'Importing...' : 'Import from Excel'}</p>
+              <p className="text-xs text-text-muted">Import operations from .xlsx logbook</p>
+            </div>
+          </button>
+        </LockedFeature>
         {importResult && (
           <p className={`text-sm ${importResult.includes('failed') ? 'text-danger' : 'text-success'}`}>
             {importResult}
@@ -391,17 +430,19 @@ export function SettingsPage() {
       {isConfigured && (
         <section className="space-y-3">
           <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Support</h2>
-          <button
-            onClick={() => { trackSupportOpened(); navigate(user ? '/support' : '/login?returnTo=/support'); }}
-            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-          >
-            <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />
-            <div className="text-left flex-1">
-              <p className="font-medium text-sm">Get help or report an issue</p>
-              <p className="text-xs text-text-muted">Report a bug or suggest a new feature</p>
-            </div>
-            <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />
-          </button>
+          <LockedFeature feature="support">
+            <button
+              onClick={() => { trackSupportOpened(); navigate('/support'); }}
+              className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+            >
+              <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />
+              <div className="text-left flex-1">
+                <p className="font-medium text-sm">Get help or report an issue</p>
+                <p className="text-xs text-text-muted">Report a bug or suggest a new feature</p>
+              </div>
+              <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />
+            </button>
+          </LockedFeature>
         </section>
       )}
 
@@ -460,7 +501,7 @@ export function SettingsPage() {
         <p className="text-sm text-text-muted">Theatrelog v0.2.0 — Surgical operation logbook</p>
         <p className="text-xs text-text-muted">
           Data stored locally on device.{' '}
-          {isConfigured ? 'Firebase sync available.' : 'Configure Firebase for cloud sync.'}
+          {tier === 'paid' ? 'Cloud sync active.' : isConfigured ? 'Upgrade to Pro for cloud sync.' : 'Configure Firebase for cloud sync.'}
         </p>
         <p className="text-xs text-text-muted">
           Deleted operations are permanently purged after 30 days.

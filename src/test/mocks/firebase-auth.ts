@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-let authChangeCallback: ((user: unknown) => void) | null = null;
+const authChangeCallbacks = new Set<(user: unknown) => void>();
 
 export const mockSignInEmail = vi.fn().mockResolvedValue({ user: null });
 export const mockSignUpEmail = vi.fn().mockResolvedValue({ user: null });
@@ -8,11 +8,11 @@ export const mockSignInGoogle = vi.fn().mockResolvedValue({ user: null });
 export const mockSignOut = vi.fn().mockResolvedValue(undefined);
 export const mockDeleteAccount = vi.fn().mockResolvedValue(undefined);
 export const mockOnAuthChange = vi.fn((cb: (user: unknown) => void) => {
-  authChangeCallback = cb;
+  authChangeCallbacks.add(cb);
   // Call with null initially (no user signed in)
   cb(null);
   return () => {
-    authChangeCallback = null;
+    authChangeCallbacks.delete(cb);
   };
 });
 
@@ -20,8 +20,8 @@ export const mockOnAuthChange = vi.fn((cb: (user: unknown) => void) => {
  * Simulate a sign-in by triggering the auth change callback with a user object.
  */
 export function triggerAuthChange(user: unknown) {
-  if (authChangeCallback) {
-    authChangeCallback(user);
+  for (const cb of authChangeCallbacks) {
+    cb(user);
   }
 }
 

@@ -1,5 +1,19 @@
 export type InvolvementLevel = 'assistant' | 'supervised' | 'independent';
 
+export type UserTier = 'free' | 'signed-in' | 'paid';
+
+export type GatedFeature =
+  | 'sync'
+  | 'import'
+  | 'exportCsv'
+  | 'exportXlsx'
+  | 'exportJson'
+  | 'portfolio'
+  | 'gradeSetting'
+  | 'specialtySetting'
+  | 'support'
+  | 'customProcedures';
+
 export interface ProcedureType {
   id: string;
   name: string;

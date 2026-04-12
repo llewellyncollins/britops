@@ -178,7 +178,7 @@ const SETTINGS_COLLECTION = 'userSettings';
 
 export async function pushUserSettingsToFirestore(
   userId: string,
-  settings: UserSettings,
+  settings: Partial<UserSettings>,
 ): Promise<void> {
   if (!firestore || !isConfigured) return;
   const ref = doc(firestore, SETTINGS_COLLECTION, userId);
