@@ -6,8 +6,8 @@ import {
   where,
   getDocs,
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { firestore, app, isConfigured } from './config';
+import { httpsCallable } from 'firebase/functions';
+import { firestore, functions, isConfigured } from './config';
 import type { User } from 'firebase/auth';
 
 export interface StripePrice {
@@ -95,6 +95,13 @@ export async function createCheckoutSession(
     throw new Error('Firebase not configured');
   }
 
+  // The Stripe Extension doesn't run in the local emulator.
+  // Sign in as pro@test.com to get Pro access without going through checkout.
+  if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+    console.warn('[emulator] Stripe checkout mocked — use npm run dev (staging) for real payments');
+    return `https://checkout.stripe.com/c/pay/emulator_mock?priceId=${priceId}`;
+  }
+
   const sessionsRef = collection(firestore, 'customers', user.uid, 'checkout_sessions');
   const docRef = await addDoc(sessionsRef, {
     price: priceId,
@@ -148,11 +155,15 @@ export async function getActiveSubscription(
  * Uses the Firebase Extension's createPortalLink callable function.
  */
 export async function createPortalSession(): Promise<string> {
-  if (!app || !isConfigured) {
+  if (!functions || !isConfigured) {
     throw new Error('Firebase not configured');
   }
 
-  const functions = getFunctions(app);
+  // The Stripe Extension's createPortalLink function doesn't run in the local emulator.
+  if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+    return 'http://127.0.0.1:4000';
+  }
+
   const createPortalLink = httpsCallable<
     { returnUrl: string },
     { url: string }

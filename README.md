@@ -69,10 +69,30 @@ VITE_FIREBASE_APP_ID=
 ### Run
 
 ```bash
-npm run dev        # Dev server at http://localhost:5173
+npm run dev        # Dev server at http://localhost:5173 (hits staging Firebase)
 npm run build      # Production build
 npm run preview    # Preview production build locally
 ```
+
+### Local Dev with Emulators
+
+For development without touching the staging project:
+
+1. Install the Firebase CLI if you haven't already: `npm install -g firebase-tools`
+2. Run `npm run dev:emulator` — starts Auth/Firestore/Functions emulators, seeds test data, and launches Vite
+
+Test accounts (created automatically by the seed script):
+
+| Email | Password | Tier |
+|---|---|---|
+| `free@test.com` | `password123` | Free |
+| `pro@test.com` | `password123` | Pro (full access) |
+
+Emulator UI at http://127.0.0.1:4000 — inspect Auth users and Firestore documents live.
+Emulator state persists in `.emulator-data/` (gitignored) between runs.
+
+> Stripe checkout is mocked in emulator mode. For end-to-end payment testing, use `npm run dev`
+> against staging with Stripe test card `4242 4242 4242 4242`.
 
 ---
 
@@ -92,6 +112,9 @@ npm run preview    # Preview production build locally
 | `npm run analyze` | Build with bundle visualiser |
 | `npm run lhci` | Run Lighthouse CI |
 | `npm run icons` | Regenerate PNG icons from `brand/theatrelog-icon-navy.svg` |
+| `npm run dev:emulator` | Firebase emulators + seed + Vite (no staging side-effects) |
+| `npm run emulator:start` | Start Firebase emulators (Auth, Firestore, Functions, UI at :4000) |
+| `npm run emulator:seed` | Seed emulators with test users and Stripe product fixtures |
 
 ---
 

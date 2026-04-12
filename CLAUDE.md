@@ -54,7 +54,7 @@ Run `npm run icons` to regenerate PNG icons from `brand/theatrelog-icon-navy.svg
 ## Commands
 
 ```bash
-npm run dev          # Start dev server (port 5173)
+npm run dev          # Start dev server (port 5173) — hits staging Firebase
 npm run build        # TypeScript compile + Vite production build
 npm run lint         # ESLint
 npm run test         # Vitest unit & integration tests (run mode)
@@ -66,6 +66,11 @@ npm run preview      # Preview production build locally
 npm run size         # Check bundle size limits
 npm run analyze      # Build with bundle visualizer (sets ANALYZE=true)
 npm run lhci         # Run Lighthouse CI
+
+# Firebase emulator workflow (no staging side-effects)
+npm run dev:emulator   # Start emulators + seed test data + Vite in emulator mode
+npm run emulator:start # Start Firebase emulators only (Auth:9099, Firestore:8080, UI:4000)
+npm run emulator:seed  # Seed emulators with test users and Stripe product fixtures
 ```
 
 ## Project Structure
@@ -240,6 +245,50 @@ Pattern: inline `if (!user) { navigate('/login?returnTo=...'); return; }` guard 
 - `deleteAccount()` calls `purgeAllUserData()` before removing the Firebase Auth account
 - `/privacy` and `/terms` pages are publicly accessible (no auth required)
 
+## Local Emulator Environment
+
+Run `npm run dev:emulator` to develop against Firebase emulators with no staging side-effects.
+Emulator UI: http://127.0.0.1:4000
+
+### Test Accounts (seeded automatically)
+
+| Email | Password | Tier |
+|---|---|---|
+| `free@test.com` | `password123` | Free (no stripeRole claim) |
+| `pro@test.com` | `password123` | Pro (stripeRole: "pro" custom claim) |
+
+### How It Works
+
+- Auth (port 9099) + Firestore (port 8080) + Functions (port 5001) run locally
+- `demo-britops` project ID causes the Firebase SDK to refuse all real network calls
+- Emulator state persists between runs in `.emulator-data/` (gitignored)
+- Stripe checkout and billing portal are **mocked** in emulator mode — use `npm run dev` (staging) to test real Stripe payments with test cards
+
+### Stripe Testing
+
+| Mode | Command | Notes |
+|---|---|---|
+| Pro features (no Stripe) | `npm run dev:emulator`, sign in as `pro@test.com` | Custom claim set by seed script |
+| Real checkout | `npm run dev` (staging) | Use card `4242 4242 4242 4242` |
+| Full local webhook loop | See advanced docs below | Requires Stripe CLI |
+
+**Stripe test cards (staging mode):**
+- `4242 4242 4242 4242` — success
+- `4000 0025 0000 3155` — 3DS required
+- `4000 0000 0000 9995` — declined
+
+**Full local webhook loop (advanced):**
+```bash
+# Terminal 1 — emulators
+npm run emulator:start
+
+# Terminal 2 — Stripe CLI forwards webhooks to local Functions emulator
+stripe listen --forward-to http://127.0.0.1:5001/demo-britops/europe-west2/ext-firestore-stripe-payments-handleWebhookEvents
+
+# Terminal 3 — Vite
+vite --mode emulator
+```
+
 ## Deployment Pipeline
 
 ### Environments
@@ -304,6 +353,7 @@ VITE_FIREBASE_PROJECT_ID
 VITE_FIREBASE_STORAGE_BUCKET
 VITE_FIREBASE_MESSAGING_SENDER_ID
 VITE_FIREBASE_APP_ID
+VITE_USE_EMULATORS     # Set to "true" in .env.emulator — connects SDK to local emulators
 ```
 
 **Note:** These are not secret — they're visible in the client JS bundle. Security relies on Firestore Security Rules and Firebase Auth, not key secrecy.

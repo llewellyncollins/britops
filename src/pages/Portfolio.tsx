@@ -33,6 +33,45 @@ export function Portfolio() {
 
   useEffect(() => { trackPageView({ page_name: 'Portfolio' }); }, []);
 
+  const availableGrades = useMemo(() => {
+    const grades = new Set(operations.filter(op => !op.deleted && op.grade).map(op => op.grade));
+    return [...grades].sort();
+  }, [operations]);
+
+  const filtered = useMemo(() => operations.filter(op => {
+    if (op.deleted) return false;
+    if (dateFrom && op.date < dateFrom) return false;
+    if (dateTo && op.date > dateTo) return false;
+    if (filterGrade && op.grade !== filterGrade) return false;
+    return true;
+  }), [operations, dateFrom, dateTo, filterGrade]);
+
+  const rows = usePortfolio(filtered, allProcedures);
+  const totalOps = filtered.length;
+
+  // KPI derived values
+  const independentCount = filtered.filter(op => op.involvement === 'independent').length;
+  const supervisedCount = filtered.filter(op => op.involvement === 'supervised').length;
+  const assistantCount = filtered.filter(op => op.involvement === 'assistant').length;
+  const complicationCount = filtered.filter(
+    op => op.intraOpComplications.trim() || op.postOpComplications.trim()
+  ).length;
+  const mdtCount = filtered.filter(op => op.discussedMDT).length;
+
+  const pct = (n: number) => totalOps > 0 ? `${Math.round(n / totalOps * 100)}%` : '—';
+
+  // Monthly activity chart
+  const monthlyData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const op of filtered) {
+      const month = op.date.slice(0, 7);
+      counts[month] = (counts[month] ?? 0) + 1;
+    }
+    return Object.entries(counts).sort(([a], [b]) => a.localeCompare(b)).slice(-24);
+  }, [filtered]);
+
+  const maxMonthCount = Math.max(...monthlyData.map(([, n]) => n), 1);
+
   if (!can('portfolio')) {
     return (
       <div className="p-4 max-w-2xl mx-auto">
@@ -60,45 +99,6 @@ export function Portfolio() {
       </div>
     );
   }
-
-  const availableGrades = useMemo(() => {
-    const grades = new Set(operations.filter(op => !op.deleted && op.grade).map(op => op.grade));
-    return [...grades].sort();
-  }, [operations]);
-
-  const filtered = operations.filter(op => {
-    if (op.deleted) return false;
-    if (dateFrom && op.date < dateFrom) return false;
-    if (dateTo && op.date > dateTo) return false;
-    if (filterGrade && op.grade !== filterGrade) return false;
-    return true;
-  });
-
-  const rows = usePortfolio(filtered, allProcedures);
-  const totalOps = filtered.length;
-
-  // KPI derived values
-  const independentCount = filtered.filter(op => op.involvement === 'independent').length;
-  const supervisedCount = filtered.filter(op => op.involvement === 'supervised').length;
-  const assistantCount = filtered.filter(op => op.involvement === 'assistant').length;
-  const complicationCount = filtered.filter(
-    op => op.intraOpComplications.trim() || op.postOpComplications.trim()
-  ).length;
-  const mdtCount = filtered.filter(op => op.discussedMDT).length;
-
-  const pct = (n: number) => totalOps > 0 ? `${Math.round(n / totalOps * 100)}%` : '—';
-
-  // Monthly activity chart
-  const monthlyData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const op of filtered) {
-      const month = op.date.slice(0, 7);
-      counts[month] = (counts[month] ?? 0) + 1;
-    }
-    return Object.entries(counts).sort(([a], [b]) => a.localeCompare(b)).slice(-24);
-  }, [filtered]);
-
-  const maxMonthCount = Math.max(...monthlyData.map(([, n]) => n), 1);
 
   function formatMonth(ym: string) {
     const [year, month] = ym.split('-');

@@ -17,12 +17,12 @@ import {
   setUserProperties,
   type Analytics,
 } from 'firebase/analytics';
-import { app, isConfigured } from './config';
+import { app, isConfigured, useEmulators } from './config';
 
 let _analytics: Analytics | null = null;
 
 function getAnalyticsInstance(): Analytics | null {
-  if (!isConfigured || !app) return null;
+  if (!isConfigured || !app || useEmulators) return null;
   if (!_analytics) {
     try {
       _analytics = getAnalytics(app);

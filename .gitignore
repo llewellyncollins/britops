@@ -20,6 +20,8 @@ ext-stripe-params.env
 
 # Firebase
 .firebase/
+.emulator-data/
+firebase-export*
 
 # Test output
 coverage/
