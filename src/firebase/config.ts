@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? '',
@@ -20,14 +20,11 @@ let firestore: ReturnType<typeof getFirestore> | null = null;
 if (isConfigured) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
+  // Do NOT enable IndexedDB persistence — Dexie is the offline store.
+  // With persistence enabled, setDoc resolves against the local cache before
+  // the server confirms, so security-rule rejections and network errors never
+  // surface to our try/catch blocks, causing silent write failures.
   firestore = getFirestore(app);
-  enableIndexedDbPersistence(firestore).catch(err => {
-    if (err.code === 'failed-precondition') {
-      console.warn('Firestore persistence unavailable: multiple tabs open');
-    } else if (err.code === 'unimplemented') {
-      console.warn('Firestore persistence not supported in this browser');
-    }
-  });
 }
 
 export { app, auth, firestore, isConfigured };

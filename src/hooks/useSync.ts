@@ -5,6 +5,7 @@ import {
   subscribeToFirestore,
   syncFromFirestore,
   pushToFirestore,
+  isSyncingFromFirestore,
   migrateLocalOps,
   pushProcedureTypeToFirestore,
   deleteProcedureTypeFromFirestore,
@@ -34,14 +35,33 @@ export function useSync(user: User | null) {
   // Hooks are registered globally on the Dexie db; they read userRef at
   // execution time so they never need to be re-registered on auth changes.
   useEffect(() => {
-    function schedule(fn: () => void) {
-      const id = setTimeout(fn, 0);
+    function schedule(fn: () => Promise<void>) {
+      const id = setTimeout(() => { fn().catch(console.error); }, 0);
       timeoutIds.current.push(id);
     }
 
+    async function markSyncedIfUnchanged(id: string, pushedUpdatedAt: string) {
+      // Only flip syncPending to false if no newer update has occurred since
+      // we started pushing. This prevents races where a later update is lost.
+      const current = await db.operations.get(id);
+      if (current && current.updatedAt === pushedUpdatedAt) {
+        await db.operations.update(id, { syncPending: false });
+      }
+    }
+
     const opsCreating = function (_primKey: unknown, obj: OperationEntry) {
-      if (!userRef.current || !isConfigured) return;
-      schedule(() => pushToFirestore(obj));
+      if (!userRef.current) { console.warn('[sync] opsCreating skipped — no user'); return; }
+      if (!isConfigured) { console.warn('[sync] opsCreating skipped — Firebase not configured'); return; }
+      if (isSyncingFromFirestore) return; // remote write, intentionally silent
+      if (!navigator.onLine) { console.log('[sync] opsCreating queued (offline):', obj.id); return; }
+      schedule(async () => {
+        try {
+          await pushToFirestore(obj);
+          await markSyncedIfUnchanged(obj.id, obj.updatedAt);
+        } catch (err) {
+          console.error('[sync] Push failed, will retry on reconnect:', err);
+        }
+      });
     };
 
     const opsUpdating = function (
@@ -49,20 +69,40 @@ export function useSync(user: User | null) {
       _primKey: unknown,
       obj: OperationEntry,
     ) {
-      if (!userRef.current || !isConfigured) return;
-      schedule(() => pushToFirestore({ ...obj, ...modifications }));
+      if (!userRef.current || !isConfigured || isSyncingFromFirestore) return;
+      // Skip bookkeeping updates that flip syncPending → false after a successful push.
+      // All real user updates (via useOperations) always set syncPending: true, so a
+      // modification that sets it to false is always internal bookkeeping and must not
+      // retrigger a push (prevents hook loop). Dexie's multi-value index quirk can add
+      // extra fields like `procedures` to modifications, so a simple length check is not
+      // reliable — checking the syncPending value directly is.
+      if (modifications.syncPending === false) return;
+      if (!navigator.onLine) return; // will be recovered by online handler
+      const pushed = { ...obj, ...modifications } as OperationEntry;
+      schedule(async () => {
+        try {
+          await pushToFirestore(pushed);
+          await markSyncedIfUnchanged(pushed.id, pushed.updatedAt);
+        } catch (err) {
+          console.error('[sync] Push failed, will retry on reconnect:', err);
+        }
+      });
     };
 
     const ptCreating = function (_primKey: unknown, obj: ProcedureType) {
       if (!userRef.current || !isConfigured || !obj.isCustom) return;
       const uid = userRef.current.uid;
-      schedule(() => pushProcedureTypeToFirestore(uid, obj));
+      schedule(async () => {
+        await pushProcedureTypeToFirestore(uid, obj);
+      });
     };
 
     const ptDeleting = function (primKey: string) {
       if (!userRef.current || !isConfigured) return;
       const uid = userRef.current.uid;
-      schedule(() => deleteProcedureTypeFromFirestore(uid, primKey));
+      schedule(async () => {
+        await deleteProcedureTypeFromFirestore(uid, primKey);
+      });
     };
 
     db.operations.hook('creating', opsCreating);
@@ -80,11 +120,13 @@ export function useSync(user: User | null) {
     };
   }, []); // mount only
 
-  // ── Effect 2: Migrate pre-login data on first sign-in ────────────────────
+  // ── Effect 2: Migrate pre-login data on first sign-in, then push pending ──
   useEffect(() => {
     if (user && !prevUserRef.current) {
-      // null → signed in: claim any 'local-user' operations
-      migrateLocalOps(user.uid).catch(console.error);
+      // null → signed in: claim any 'local-user' operations then push anything unsynced
+      migrateLocalOps(user.uid)
+        .then(() => pushPendingOps(user.uid))
+        .catch(console.error);
     }
     prevUserRef.current = user;
   }, [user]);
@@ -114,7 +156,7 @@ export function useSync(user: User | null) {
     };
   }, [user]);
 
-  // ── Effect 4: Push settings changes to Firestore ───────────────────────────
+  // ── Effect 4: Push settings changes to Firestore ──────────────────────────
   useEffect(() => {
     if (!user || !isConfigured) return;
 
@@ -130,5 +172,40 @@ export function useSync(user: User | null) {
     return unsub;
   }, [user]);
 
+  // ── Effect 5: Push pending operations when connectivity is restored ───────
+  useEffect(() => {
+    const handleOnline = () => {
+      const uid = userRef.current?.uid;
+      if (!uid || !isConfigured) return;
+      pushPendingOps(uid).catch(console.error);
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, []); // mount only
+
   return { syncing };
+}
+
+/**
+ * Push all operations for a user that have `syncPending: true`.
+ * Exported for use by Effects 2 and 5 as well as tests.
+ *
+ * Race guard: only flips syncPending to false if the op's updatedAt matches
+ * what was pushed — otherwise a newer local modification would be hidden.
+ */
+export async function pushPendingOps(userId: string): Promise<void> {
+  const all = await db.operations.where('userId').equals(userId).toArray();
+  const pending = all.filter(op => op.syncPending);
+  for (const op of pending) {
+    try {
+      await pushToFirestore(op);
+      const current = await db.operations.get(op.id);
+      if (current && current.updatedAt === op.updatedAt) {
+        await db.operations.update(op.id, { syncPending: false });
+      }
+    } catch (err) {
+      console.error('[sync] Pending push failed for op:', op.id, err);
+    }
+  }
 }

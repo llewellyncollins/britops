@@ -19,10 +19,24 @@ import type { UserSettings } from '../stores/useSettingsStore';
 
 const OPS_COLLECTION = 'operations';
 
+/**
+ * Flag set to true while syncFromFirestore is writing to Dexie.
+ * Dexie hooks read this to avoid re-pushing data that originated from Firestore.
+ */
+export let isSyncingFromFirestore = false;
+
 export async function pushToFirestore(entry: OperationEntry) {
-  if (!firestore || !isConfigured) return;
+  if (!firestore || !isConfigured) {
+    console.warn('[sync] pushToFirestore skipped — Firebase not initialised. isConfigured:', isConfigured, 'firestore:', !!firestore);
+    return;
+  }
+  // Strip the local-only syncPending field before writing to Firestore
+  const data: Omit<OperationEntry, 'syncPending'> & { syncPending?: boolean } = { ...entry };
+  delete data.syncPending;
   const ref = doc(firestore, OPS_COLLECTION, entry.id);
-  await setDoc(ref, entry, { merge: true });
+  console.log('[sync] pushToFirestore →', entry.id, '(userId:', entry.userId, ')');
+  await setDoc(ref, data, { merge: true });
+  console.log('[sync] pushToFirestore ✓', entry.id);
 }
 
 export async function pushAllToFirestore(userId: string) {
@@ -53,13 +67,20 @@ export function subscribeToFirestore(
 }
 
 export async function syncFromFirestore(remoteEntries: OperationEntry[]) {
-  for (const remote of remoteEntries) {
-    const local = await db.operations.get(remote.id);
-    if (!local) {
-      await db.operations.add(remote);
-    } else if (remote.updatedAt > local.updatedAt) {
-      await db.operations.put(remote);
+  isSyncingFromFirestore = true;
+  try {
+    for (const remote of remoteEntries) {
+      // Data from Firestore is by definition synced
+      const synced: OperationEntry = { ...remote, syncPending: false };
+      const local = await db.operations.get(remote.id);
+      if (!local) {
+        await db.operations.add(synced);
+      } else if (remote.updatedAt > local.updatedAt) {
+        await db.operations.put(synced);
+      }
     }
+  } finally {
+    isSyncingFromFirestore = false;
   }
 }
 

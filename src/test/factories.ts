@@ -29,6 +29,7 @@ export function createOperation(
     updatedAt: now,
     deleted: false,
     deletedAt: null,
+    syncPending: false,
     ...overrides,
   };
 }

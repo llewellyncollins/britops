@@ -4,17 +4,26 @@ service cloud.firestore {
 
     // Operations — only the owning user may read/write
     match /operations/{opId} {
-      allow read, update, delete: if request.auth != null
+      allow read, delete: if request.auth != null
         && resource.data.userId == request.auth.uid;
+      // create: userId in the payload must match the authenticated user
       allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      // update: the existing doc must belong to the user, and the userId
+      // field may not be changed (prevents privilege escalation)
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
         && request.resource.data.userId == request.auth.uid;
     }
 
     // Custom procedure types — scoped per user
     match /procedureTypes/{typeId} {
-      allow read, update, delete: if request.auth != null
+      allow read, delete: if request.auth != null
         && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
         && request.resource.data.userId == request.auth.uid;
     }
 

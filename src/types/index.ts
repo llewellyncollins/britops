@@ -34,6 +34,8 @@ export interface OperationEntry {
   deleted: boolean;
   /** ISO timestamp set when soft-deleted. Firestore TTL policy auto-purges 30 days after this. */
   deletedAt: string | null;
+  /** True when the operation has not yet been confirmed written to Firestore. */
+  syncPending: boolean;
 }
 
 export interface ConsentRecord {

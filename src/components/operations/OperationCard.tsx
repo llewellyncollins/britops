@@ -1,5 +1,5 @@
 import type { OperationEntry, ProcedureType } from '../../types';
-import { Calendar, User, AlertTriangle, Clock, CheckCheck } from 'lucide-react';
+import { Calendar, User, AlertTriangle, Clock, CheckCheck, CloudUpload } from 'lucide-react';
 
 interface Props {
   operation: OperationEntry;
@@ -57,6 +57,12 @@ export function OperationCard({ operation, procedures, onClick, onMarkFollowUpDo
               <>
                 <Clock aria-hidden="true" size={14} className="text-accent shrink-0" />
                 <span className="sr-only">Requires follow-up</span>
+              </>
+            )}
+            {operation.syncPending && (
+              <>
+                <CloudUpload aria-hidden="true" size={14} className="text-text-muted shrink-0" />
+                <span className="sr-only">Pending sync</span>
               </>
             )}
           </div>

@@ -16,4 +16,14 @@ db.version(2).stores({
   procedureTypes: 'id, specialty, category, isCustom',
 });
 
+// v3: adds syncPending index for efficient pending-sync queries
+db.version(3)
+  .stores({
+    operations: 'id, userId, date, *procedures, involvement, deleted, updatedAt, syncPending',
+    procedureTypes: 'id, specialty, category, isCustom',
+  })
+  .upgrade(tx =>
+    tx.table('operations').toCollection().modify({ syncPending: true }),
+  );
+
 export { db };

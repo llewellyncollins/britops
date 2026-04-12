@@ -22,7 +22,7 @@ export function useOperations() {
     []
   );
 
-  async function addOperation(data: Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted' | 'deletedAt'>) {
+  async function addOperation(data: Omit<OperationEntry, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deleted' | 'deletedAt' | 'syncPending'>) {
     const now = new Date().toISOString();
     const entry: OperationEntry = {
       ...data,
@@ -32,6 +32,7 @@ export function useOperations() {
       updatedAt: now,
       deleted: false,
       deletedAt: null,
+      syncPending: true,
     };
     await db.operations.add(entry);
     trackOperationLogged({
@@ -46,7 +47,12 @@ export function useOperations() {
   }
 
   async function updateOperation(id: string, data: Partial<OperationEntry>) {
-    await db.operations.update(id, { ...data, updatedAt: new Date().toISOString() });
+    // Always mark syncPending: true so a failed push leaves the op in the recovery queue
+    await db.operations.update(id, {
+      ...data,
+      updatedAt: new Date().toISOString(),
+      syncPending: true,
+    });
     trackOperationUpdated({
       involvement: data.involvement ?? 'unknown',
       procedure_count: (data.procedures ?? []).length,
@@ -55,7 +61,13 @@ export function useOperations() {
 
   async function deleteOperation(id: string) {
     const now = new Date().toISOString();
-    await db.operations.update(id, { deleted: true, deletedAt: now, updatedAt: now });
+    // Always mark syncPending: true so a failed push leaves the op in the recovery queue
+    await db.operations.update(id, {
+      deleted: true,
+      deletedAt: now,
+      updatedAt: now,
+      syncPending: true,
+    });
     trackOperationDeleted();
   }
 
