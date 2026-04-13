@@ -275,7 +275,7 @@ export function SettingsPage() {
               )}
               <button
                 onClick={() => { signOut(); trackSignOut(); }}
-                className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text-muted hover:text-danger hover:border-danger transition-colors"
+                className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text hover:text-danger hover:border-danger transition-colors"
               >
                 <LogOut aria-hidden="true" size={16} />
                 Sign out

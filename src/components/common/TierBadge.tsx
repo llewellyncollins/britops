@@ -3,7 +3,7 @@ import type { UserTier } from '../../types';
 
 const TIER_CONFIG: Record<UserTier, { label: string; className: string }> = {
   free: { label: 'Free', className: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' },
-  'signed-in': { label: 'Signed In', className: 'bg-teal-50 text-success dark:bg-teal-900/30 dark:text-teal-300' },
+  'signed-in': { label: 'Signed In', className: 'bg-primary text-white dark:bg-blue-800 dark:text-blue-100' },
   paid: { label: 'Pro', className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
 };
 
