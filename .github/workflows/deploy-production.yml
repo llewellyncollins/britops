@@ -18,10 +18,19 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Deploy Firestore rules
+      - name: Configure Stripe extension
+        run: |
+          cat > ext-stripe-params.env << 'PARAMS'
+          LOCATION=europe-west2
+          STRIPE_API_KEY=${{ secrets.PROD_STRIPE_API_KEY }}
+          CUSTOMERS_COLLECTION=customers
+          PRODUCTS_COLLECTION=products
+          SYNC_USERS_ON_CREATE=Disabled
+          PARAMS
+      - name: Deploy Firestore rules and extensions
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219 }}' > /tmp/sa.json
-          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules --project britops-1f219
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules,extensions --project britops-1f219
       - run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
