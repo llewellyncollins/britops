@@ -105,7 +105,9 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Run E2E tests
         id: playwright
-        run: npx playwright test --project=chromium --reporter=list --reporter=junit --reporter=github 2>&1 | tee e2e-results.txt
+        run: |
+          mkdir -p test-results
+          npx playwright test --project=chromium --reporter=list,junit,github 2>&1 | tee e2e-results.txt
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/e2e-report.xml
       - name: Generate E2E test summary
