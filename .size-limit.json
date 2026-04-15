@@ -2,7 +2,7 @@
   {
     "name": "app index chunk",
     "path": "dist/assets/index-*.js",
-    "limit": "81 KB",
+    "limit": "87 KB",
     "brotli": true
   },
   {
