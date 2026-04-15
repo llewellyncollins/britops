@@ -36,7 +36,63 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run test
+      - name: Run unit & integration tests
+        id: vitest
+        run: |
+          mkdir -p test-results
+          npx vitest run \
+            --reporter=default --reporter=junit --reporter=github-actions \
+            --coverage --coverage.reporter=text --coverage.reporter=json-summary \
+            --pool=forks 2>&1 | tee test-results/vitest-output.txt
+        env:
+          JUNIT_OUTPUT_FILE: test-results/vitest-report.xml
+      - name: Generate test summary
+        if: always()
+        run: |
+          echo "## Unit & Integration Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Parse JUnit XML for test counts
+          if [ -f test-results/vitest-report.xml ]; then
+            TESTS=$(grep -oP 'tests="\K[0-9]+' test-results/vitest-report.xml | head -1)
+            FAILURES=$(grep -oP 'failures="\K[0-9]+' test-results/vitest-report.xml | head -1)
+            ERRORS=$(grep -oP 'errors="\K[0-9]+' test-results/vitest-report.xml | head -1)
+            TIME=$(grep -oP 'time="\K[0-9.]+' test-results/vitest-report.xml | head -1)
+            PASSED=$((TESTS - FAILURES - ERRORS))
+
+            if [ "$FAILURES" = "0" ] && [ "$ERRORS" = "0" ]; then
+              echo "✅ **All ${TESTS} tests passed** in ${TIME}s" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **${FAILURES} failed**, ${PASSED} passed out of ${TESTS} tests (${TIME}s)" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | ${PASSED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed | ${FAILURES} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Errors | ${ERRORS} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Duration | ${TIME}s |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No JUnit report found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Extract coverage table from vitest output
+          if [ -f test-results/vitest-output.txt ]; then
+            echo "### Coverage" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            sed -n '/^-.*|.*-$/,/^-.*|.*-$/p' test-results/vitest-output.txt | grep -E "All files|^-" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: test-results/
+          retention-days: 14
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -48,12 +104,56 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e -- --project=chromium
+      - name: Run E2E tests
+        id: playwright
+        run: npx playwright test --project=chromium --reporter=list --reporter=junit --reporter=github 2>&1 | tee e2e-results.txt
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/e2e-report.xml
+      - name: Generate E2E test summary
+        if: always()
+        run: |
+          echo "## E2E Tests (Chromium)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f test-results/e2e-report.xml ]; then
+            TESTS=$(grep -oP 'tests="\K[0-9]+' test-results/e2e-report.xml | head -1)
+            FAILURES=$(grep -oP 'failures="\K[0-9]+' test-results/e2e-report.xml | head -1)
+            ERRORS=$(grep -oP 'errors="\K[0-9]+' test-results/e2e-report.xml | head -1)
+            TIME=$(grep -oP 'time="\K[0-9.]+' test-results/e2e-report.xml | head -1)
+            PASSED=$((TESTS - FAILURES - ERRORS))
+
+            if [ "$FAILURES" = "0" ] && [ "$ERRORS" = "0" ]; then
+              echo "✅ **All ${TESTS} E2E tests passed** in ${TIME}s" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **${FAILURES} failed**, ${PASSED} passed out of ${TESTS} E2E tests (${TIME}s)" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | ${PASSED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed | ${FAILURES} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Duration | ${TIME}s |" >> $GITHUB_STEP_SUMMARY
+
+            # List failed tests if any
+            if [ "$FAILURES" != "0" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Failed Tests" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              grep -oP 'classname="\K[^"]+' test-results/e2e-report.xml | sort -u | while read -r name; do
+                echo "- \`${name}\`" >> $GITHUB_STEP_SUMMARY
+              done
+            fi
+          else
+            echo "⚠️ No JUnit report found" >> $GITHUB_STEP_SUMMARY
+          fi
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 14
 
   # lighthouse:
