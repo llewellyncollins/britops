@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_PROCEDURES } from "./procedures";
+import { DEFAULT_PROCEDURES, getAllSpecialties, getCategoriesForSpecialty } from "./procedures";
 
 describe("DEFAULT_PROCEDURES data integrity", () => {
   it("contains exactly 193 procedures", () => {
@@ -58,5 +58,32 @@ describe("DEFAULT_PROCEDURES data integrity", () => {
         `${proc.id} has subcategory but empty category`,
       ).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("getAllSpecialties", () => {
+  it("returns sorted unique specialties", () => {
+    const specialties = getAllSpecialties(DEFAULT_PROCEDURES);
+    expect(specialties).toContain("General Surgery");
+    expect(specialties).toContain("Orthopaedics");
+    // Check sorted
+    const sorted = [...specialties].sort();
+    expect(specialties).toEqual(sorted);
+  });
+
+  it("returns empty array for empty input", () => {
+    expect(getAllSpecialties([])).toEqual([]);
+  });
+});
+
+describe("getCategoriesForSpecialty", () => {
+  it("returns categories for a specific specialty", () => {
+    const categories = getCategoriesForSpecialty(DEFAULT_PROCEDURES, "General Surgery");
+    expect(categories.length).toBeGreaterThan(0);
+    expect(categories).toContain("Hepatobiliary");
+  });
+
+  it("returns empty array for unknown specialty", () => {
+    expect(getCategoriesForSpecialty(DEFAULT_PROCEDURES, "Nonexistent")).toEqual([]);
   });
 });

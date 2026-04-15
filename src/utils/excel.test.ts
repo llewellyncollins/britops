@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { parseFlexibleDate, matchProcedures } from './excel';
+import { describe, it, expect, vi } from 'vitest';
+import { parseFlexibleDate, matchProcedures, exportPortfolioXlsx } from './excel';
 import { DEFAULT_PROCEDURES } from '../data/procedures';
+import { createOperation, createPortfolioRow, createProcedureType } from '../test/factories';
 import type { ProcedureType } from '../types';
 
 describe('parseFlexibleDate', () => {
@@ -104,5 +105,44 @@ describe('matchProcedures', () => {
     ];
     const result = matchProcedures('Custom Op', custom);
     expect(result).toEqual(['custom_1']);
+  });
+});
+
+vi.mock('xlsx', async () => {
+  const actual = await vi.importActual<typeof import('xlsx')>('xlsx');
+  return { ...actual, writeFile: vi.fn() };
+});
+
+describe('exportPortfolioXlsx', () => {
+  it('generates xlsx without throwing', async () => {
+    const XLSX = await import('xlsx');
+
+    const operations = [
+      createOperation({ procedures: ['gs_lap_chole'], involvement: 'independent' }),
+      createOperation({ procedures: ['gs_lap_chole'], involvement: 'supervised', deleted: true }),
+    ];
+    const rows = [createPortfolioRow()];
+    const procedures = [
+      createProcedureType({ id: 'gs_lap_chole', name: 'Laparoscopic cholecystectomy', specialty: 'General Surgery', category: 'Hepatobiliary', isCustom: false }),
+    ];
+
+    expect(() => exportPortfolioXlsx(operations, rows, procedures)).not.toThrow();
+    expect(XLSX.writeFile).toHaveBeenCalled();
+  });
+
+  it('skips deleted operations in log sheet', async () => {
+    const XLSX = await import('xlsx');
+
+    const operations = [
+      createOperation({ procedures: ['gs_lap_chole'], deleted: false, patientId: 'PT001' }),
+      createOperation({ procedures: ['gs_lap_chole'], deleted: true, patientId: 'PT002' }),
+    ];
+    const rows = [createPortfolioRow()];
+    const procedures = [
+      createProcedureType({ id: 'gs_lap_chole', name: 'Lap chole', specialty: 'GS', category: 'HB', isCustom: false }),
+    ];
+
+    exportPortfolioXlsx(operations, rows, procedures);
+    expect(XLSX.writeFile).toHaveBeenCalled();
   });
 });
