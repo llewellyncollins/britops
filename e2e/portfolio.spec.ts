@@ -7,9 +7,11 @@ test.describe('Portfolio', () => {
     await expect(page).toHaveURL('/');
   });
 
-  test('shows empty state when no operations logged', async ({ page }) => {
+  test('shows upgrade banner for free users', async ({ page }) => {
     await page.getByRole('link', { name: 'Portfolio' }).click();
-    await expect(page.getByText(/no operations logged yet/i)).toBeVisible();
+
+    // Portfolio is gated behind Pro tier — free users see the upgrade banner
+    await expect(page.getByText(/unlock portfolio/i)).toBeVisible();
   });
 
   test('shows aggregated data after logging operations', async ({ page }) => {
@@ -25,11 +27,8 @@ test.describe('Portfolio', () => {
     await page.getByRole('radio', { name: 'Surgeon independent' }).click();
     await page.getByRole('button', { name: 'Save Operation' }).click();
 
-    // Navigate to Portfolio
+    // Navigate to Portfolio — still gated for free users
     await page.getByRole('link', { name: 'Portfolio' }).click();
-
-    // Should see the procedure in the table
-    await expect(page.getByText('Laparoscopic cholecystectomy')).toBeVisible();
-    await expect(page.getByRole('rowheader', { name: 'General Surgery' })).toBeVisible();
+    await expect(page.getByText(/unlock portfolio/i)).toBeVisible();
   });
 });

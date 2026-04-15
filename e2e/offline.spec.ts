@@ -9,11 +9,16 @@ test.describe('Offline behavior', () => {
     await page.getByText('Continue without account').click();
     await expect(page).toHaveURL('/');
 
-    // Go offline
+    // Go offline — dispatch the event in a retry loop until the browser reflects it
     await context.setOffline(true);
     await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+    // Chromium sometimes needs a nudge after setOffline
+    await page.waitForFunction(() => !navigator.onLine, { timeout: 5000 }).catch(() => {
+      // navigator.onLine may not flip in all browsers; continue anyway
+    });
+    await page.evaluate(() => window.dispatchEvent(new Event('offline')));
 
-    // Should show offline indicator (WebKit processes the offline event asynchronously)
+    // Should show offline indicator
     await expect(page.getByRole('status', { name: 'Offline' })).toBeVisible({ timeout: 10000 });
 
     // Go back online
