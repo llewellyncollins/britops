@@ -5,7 +5,11 @@ import { trackPageView } from '../firebase/analytics';
 
 export function Dashboard() {
   const { operations } = useOperations();
-  useEffect(() => { trackPageView({ page_name: 'Dashboard' }); }, []);
+  useEffect(() => {
+    document.title = 'Logbook — Theatrelog';
+    trackPageView({ page_name: 'Dashboard' });
+    return () => { document.title = 'Theatrelog'; };
+  }, []);
 
   return (
     <div className="p-4 max-w-lg mx-auto">

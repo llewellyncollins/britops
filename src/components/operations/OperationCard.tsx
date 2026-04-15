@@ -35,7 +35,8 @@ export function OperationCard({ operation, procedures, onClick, onMarkFollowUpDo
       role="button"
       tabIndex={0}
       onClick={onClick}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      aria-label={`Edit operation: ${procedureNames.join(', ') || 'No procedures'} on ${new Date(operation.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`}
       className="w-full text-left p-4 bg-surface-raised rounded-xl border border-border hover:border-primary-light transition-colors cursor-pointer"
     >
       <div className="flex items-start justify-between gap-2">
@@ -91,7 +92,7 @@ export function OperationCard({ operation, procedures, onClick, onMarkFollowUpDo
           </span>
           <button
             onClick={e => { e.stopPropagation(); onMarkFollowUpDone(); }}
-            className="flex items-center gap-1 text-xs font-medium text-success hover:text-success/80 transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-success hover:text-success/80 transition-colors min-h-11 min-w-11 justify-center px-2"
             aria-label="Mark follow-up as done"
           >
             <CheckCheck size={12} aria-hidden="true" />

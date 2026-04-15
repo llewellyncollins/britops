@@ -7,7 +7,11 @@ import { trackPageView } from '../firebase/analytics';
 
 export function EditOperation() {
   const { id } = useParams<{ id: string }>();
-  useEffect(() => { trackPageView({ page_name: 'EditOperation' }); }, []);
+  useEffect(() => {
+    document.title = 'Edit Operation — Theatrelog';
+    trackPageView({ page_name: 'EditOperation' });
+    return () => { document.title = 'Theatrelog'; };
+  }, []);
   const operation = useLiveQuery(() => id ? db.operations.get(id) : undefined, [id]);
 
   if (operation === undefined) return <div className="p-4 text-center text-text-muted">Loading...</div>;

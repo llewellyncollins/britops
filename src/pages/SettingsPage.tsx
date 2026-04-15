@@ -49,7 +49,11 @@ export function SettingsPage() {
   const [importResult, setImportResult] = useState('');
   const [showProcedures, setShowProcedures] = useState(false);
 
-  useEffect(() => { trackPageView({ page_name: 'Settings' }); }, []);
+  useEffect(() => {
+    document.title = 'Settings — Theatrelog';
+    trackPageView({ page_name: 'Settings' });
+    return () => { document.title = 'Theatrelog'; };
+  }, []);
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -389,7 +393,7 @@ export function SettingsPage() {
           </button>
         </LockedFeature>
         {importResult && (
-          <p className={`text-sm ${importResult.includes('failed') ? 'text-danger' : 'text-success'}`}>
+          <p role="status" aria-live="polite" className={`text-sm ${importResult.includes('failed') ? 'text-danger' : 'text-success'}`}>
             {importResult}
           </p>
         )}
@@ -490,7 +494,7 @@ export function SettingsPage() {
                 Cancel
               </button>
             )}
-            {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+            {deleteError && <p role="alert" className="text-sm text-danger">{deleteError}</p>}
           </div>
         )}
       </section>

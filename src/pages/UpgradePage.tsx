@@ -45,6 +45,7 @@ export function UpgradePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    document.title = 'Upgrade — Theatrelog';
     trackUpgradePageViewed();
     getProProduct()
       .then(product => {
@@ -54,6 +55,7 @@ export function UpgradePage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+    return () => { document.title = 'Theatrelog'; };
   }, []);
 
   const selectedPrice = prices.find(p => p.interval === billingPeriod);
@@ -116,7 +118,7 @@ export function UpgradePage() {
             {portalLoading ? <Loader2 aria-hidden="true" size={16} className="animate-spin" /> : <ExternalLink aria-hidden="true" size={16} />}
             Manage subscription
           </button>
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         </div>
       ) : (
         <>
@@ -170,7 +172,7 @@ export function UpgradePage() {
                 Promotion codes can be applied at checkout. Cancel anytime.
               </p>
 
-              {error && <p className="text-sm text-danger text-center">{error}</p>}
+              {error && <p role="alert" className="text-sm text-danger text-center">{error}</p>}
             </div>
           )}
 
@@ -190,26 +192,33 @@ export function UpgradePage() {
 
       {/* Feature comparison */}
       <div className="border border-border rounded-xl overflow-hidden">
-        <div className="grid grid-cols-4 bg-primary text-white text-xs font-semibold">
-          <div className="p-2.5">Feature</div>
-          <div className="p-2.5 text-center">Free</div>
-          <div className="p-2.5 text-center">Signed In</div>
-          <div className="p-2.5 text-center">Pro</div>
-        </div>
-        {TIER_FEATURES.map(({ label, free, signedIn, pro }) => (
-          <div key={label} className="grid grid-cols-4 border-t border-border text-sm">
-            <div className="p-2.5 text-text">{label}</div>
-            <div className="p-2.5 flex justify-center">
-              {free ? <Check aria-label="Included" size={16} className="text-success" /> : <span className="text-text-muted" aria-label="Not included">—</span>}
-            </div>
-            <div className="p-2.5 flex justify-center">
-              {signedIn ? <Check aria-label="Included" size={16} className="text-success" /> : <span className="text-text-muted" aria-label="Not included">—</span>}
-            </div>
-            <div className="p-2.5 flex justify-center">
-              {pro ? <Check aria-label="Included" size={16} className="text-accent" /> : <span className="text-text-muted" aria-label="Not included">—</span>}
-            </div>
-          </div>
-        ))}
+        <table className="w-full text-sm border-collapse">
+          <caption className="sr-only">Feature comparison across Free, Signed In, and Pro tiers</caption>
+          <thead>
+            <tr className="bg-primary text-white text-xs font-semibold">
+              <th scope="col" className="p-2.5 text-left">Feature</th>
+              <th scope="col" className="p-2.5 text-center">Free</th>
+              <th scope="col" className="p-2.5 text-center">Signed In</th>
+              <th scope="col" className="p-2.5 text-center">Pro</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TIER_FEATURES.map(({ label, free, signedIn, pro }) => (
+              <tr key={label} className="border-t border-border">
+                <td className="p-2.5 text-text">{label}</td>
+                <td className="p-2.5 text-center">
+                  {free ? <Check aria-label="Included" size={16} className="text-success inline-block" /> : <span className="text-text-muted" aria-label="Not included">—</span>}
+                </td>
+                <td className="p-2.5 text-center">
+                  {signedIn ? <Check aria-label="Included" size={16} className="text-success inline-block" /> : <span className="text-text-muted" aria-label="Not included">—</span>}
+                </td>
+                <td className="p-2.5 text-center">
+                  {pro ? <Check aria-label="Included" size={16} className="text-accent inline-block" /> : <span className="text-text-muted" aria-label="Not included">—</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

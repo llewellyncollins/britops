@@ -14,13 +14,20 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  function closeDropdown() {
+    setOpen(false);
+    // Restore focus to trigger button
+    triggerRef.current?.focus();
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) closeDropdown();
     }
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') closeDropdown();
     }
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
@@ -70,6 +77,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
 
       {/* Selected chips + open trigger */}
       <button
+        ref={triggerRef}
         id={TRIGGER_ID}
         type="button"
         aria-expanded={open}
@@ -119,6 +127,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full pl-8 pr-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-2 focus:ring-primary-light"
+                // eslint-disable-next-line jsx-a11y/no-autofocus -- intentional: focus search when dropdown opens
                 autoFocus
               />
             </div>
@@ -149,7 +158,7 @@ export function ProcedurePicker({ selected, onChange, procedures }: Props) {
                       role="option"
                       aria-selected={selected.includes(p.id)}
                       onClick={() => toggle(p.id)}
-                      className={`w-full text-left px-5 py-2 text-sm text-text hover:bg-primary/10 flex items-center justify-between gap-2 ${
+                      className={`w-full text-left px-5 py-2.5 text-sm text-text hover:bg-primary/10 flex items-center justify-between gap-2 min-h-11 ${
                         selected.includes(p.id) ? 'bg-primary/10 text-primary font-medium' : ''
                       }`}
                     >

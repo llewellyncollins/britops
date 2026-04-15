@@ -37,7 +37,7 @@ export function PortfolioSummary({ rows, filterSpecialty }: Props) {
             <th scope="col" className="px-3 py-2.5 font-semibold text-center w-16 opacity-80">
               <abbr title="Supervised" className="no-underline">Supv</abbr>
             </th>
-            <th scope="col" className="px-3 py-2.5 font-semibold text-center w-16 text-amber-300">
+            <th scope="col" className="px-3 py-2.5 font-semibold text-center w-16 text-amber-100">
               <abbr title="Independent" className="no-underline">Indep</abbr>
             </th>
           </tr>

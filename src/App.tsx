@@ -11,6 +11,7 @@ import { SupportPage } from './pages/SupportPage';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { Login } from './pages/Login';
+import { RouteAnnouncer } from './components/common/RouteAnnouncer';
 import { useAuth } from './hooks/useAuth';
 import { useTier } from './hooks/useTier';
 import { useSync } from './hooks/useSync';
@@ -57,6 +58,7 @@ export default function App() {
   return (
     <SyncProvider syncing={syncing}>
       <BrowserRouter>
+        <RouteAnnouncer />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -313,7 +313,7 @@ export function ProcedureTypeManager() {
                       </div>
                       <button
                         onClick={() => removeProcedureType(p.id)}
-                        className="text-text-muted hover:text-danger p-1 rounded transition-colors"
+                        className="text-text-muted hover:text-danger p-2 rounded transition-colors min-w-11 min-h-11 flex items-center justify-center"
                         aria-label={`Remove ${p.name}`}
                       >
                         <Trash2 aria-hidden="true" size={14} />

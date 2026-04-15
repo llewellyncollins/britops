@@ -128,6 +128,7 @@ export function Login() {
                 type="checkbox"
                 checked={consentChecked}
                 onChange={e => setConsentChecked(e.target.checked)}
+                aria-required="true"
                 className="mt-0.5"
               />
               <span>

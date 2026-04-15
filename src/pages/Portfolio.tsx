@@ -31,7 +31,11 @@ export function Portfolio() {
   const [filterSpecialty, setFilterSpecialty] = useState('');
   const [filterGrade, setFilterGrade] = useState('');
 
-  useEffect(() => { trackPageView({ page_name: 'Portfolio' }); }, []);
+  useEffect(() => {
+    document.title = 'Portfolio — Theatrelog';
+    trackPageView({ page_name: 'Portfolio' });
+    return () => { document.title = 'Theatrelog'; };
+  }, []);
 
   const availableGrades = useMemo(() => {
     const grades = new Set(operations.filter(op => !op.deleted && op.grade).map(op => op.grade));

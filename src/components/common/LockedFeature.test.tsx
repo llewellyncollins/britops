@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from '../../test/render-with-providers';
+import type { UserTier } from '../../types';
 
 vi.mock('../../firebase/analytics', () => ({
   trackUpgradePrompted: vi.fn(),
 }));
 
 const mockCan = vi.fn(() => true);
-const mockRequiredTier = vi.fn(() => 'paid' as const);
+const mockRequiredTier = vi.fn((): UserTier => 'paid');
 
 vi.mock('../../hooks/useTier', () => ({
   useTier: vi.fn(() => ({
