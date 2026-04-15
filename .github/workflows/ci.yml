@@ -42,10 +42,9 @@ jobs:
           mkdir -p test-results
           npx vitest run \
             --reporter=default --reporter=junit --reporter=github-actions \
+            --outputFile.junit=test-results/vitest-report.xml \
             --coverage --coverage.reporter=text --coverage.reporter=json-summary \
             --pool=forks 2>&1 | tee test-results/vitest-output.txt
-        env:
-          JUNIT_OUTPUT_FILE: test-results/vitest-report.xml
       - name: Generate test summary
         if: always()
         run: |
@@ -54,10 +53,10 @@ jobs:
 
           # Parse JUnit XML for test counts
           if [ -f test-results/vitest-report.xml ]; then
-            TESTS=$(grep -oP 'tests="\K[0-9]+' test-results/vitest-report.xml | head -1)
-            FAILURES=$(grep -oP 'failures="\K[0-9]+' test-results/vitest-report.xml | head -1)
-            ERRORS=$(grep -oP 'errors="\K[0-9]+' test-results/vitest-report.xml | head -1)
-            TIME=$(grep -oP 'time="\K[0-9.]+' test-results/vitest-report.xml | head -1)
+            TESTS=$(sed -n 's/.*tests="\([0-9]*\)".*/\1/p' test-results/vitest-report.xml | head -1)
+            FAILURES=$(sed -n 's/.*failures="\([0-9]*\)".*/\1/p' test-results/vitest-report.xml | head -1)
+            ERRORS=$(sed -n 's/.*errors="\([0-9]*\)".*/\1/p' test-results/vitest-report.xml | head -1)
+            TIME=$(sed -n 's/.*<testsuites.*time="\([0-9.]*\)".*/\1/p' test-results/vitest-report.xml | head -1)
             PASSED=$((TESTS - FAILURES - ERRORS))
 
             if [ "$FAILURES" = "0" ] && [ "$ERRORS" = "0" ]; then
@@ -79,12 +78,12 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Extract coverage table from vitest output
+          # Extract coverage summary from vitest output
           if [ -f test-results/vitest-output.txt ]; then
             echo "### Coverage" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            sed -n '/^-.*|.*-$/,/^-.*|.*-$/p' test-results/vitest-output.txt | grep -E "All files|^-" >> $GITHUB_STEP_SUMMARY
+            grep -E "^(File |All files|-.*\|.*-)" test-results/vitest-output.txt >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
       - uses: actions/upload-artifact@v4
@@ -116,10 +115,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ -f test-results/e2e-report.xml ]; then
-            TESTS=$(grep -oP 'tests="\K[0-9]+' test-results/e2e-report.xml | head -1)
-            FAILURES=$(grep -oP 'failures="\K[0-9]+' test-results/e2e-report.xml | head -1)
-            ERRORS=$(grep -oP 'errors="\K[0-9]+' test-results/e2e-report.xml | head -1)
-            TIME=$(grep -oP 'time="\K[0-9.]+' test-results/e2e-report.xml | head -1)
+            TESTS=$(sed -n 's/.*tests="\([0-9]*\)".*/\1/p' test-results/e2e-report.xml | head -1)
+            FAILURES=$(sed -n 's/.*failures="\([0-9]*\)".*/\1/p' test-results/e2e-report.xml | head -1)
+            ERRORS=$(sed -n 's/.*errors="\([0-9]*\)".*/\1/p' test-results/e2e-report.xml | head -1)
+            TIME=$(sed -n 's/.*<testsuites.*time="\([0-9.]*\)".*/\1/p' test-results/e2e-report.xml | head -1)
             PASSED=$((TESTS - FAILURES - ERRORS))
 
             if [ "$FAILURES" = "0" ] && [ "$ERRORS" = "0" ]; then
@@ -140,9 +139,7 @@ jobs:
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "### Failed Tests" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
-              grep -oP 'classname="\K[^"]+' test-results/e2e-report.xml | sort -u | while read -r name; do
-                echo "- \`${name}\`" >> $GITHUB_STEP_SUMMARY
-              done
+              sed -n 's/.*<testcase.*name="\([^"]*\)".*>\s*<failure.*/- `\1`/p' test-results/e2e-report.xml | sort -u >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "⚠️ No JUnit report found" >> $GITHUB_STEP_SUMMARY
