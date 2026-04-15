@@ -20,6 +20,7 @@ export function SyncProvider({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSyncContext() {
   return useContext(SyncContext);
 }
