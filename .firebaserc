@@ -1,18 +1,23 @@
 {
   "projects": {
-    "default": "britops-1f219"
+    "default": "britops-1f219",
+    "staging": "britops-1f219",
+    "production": "theatrelog-84575"
   },
   "targets": {
     "britops-1f219": {
       "hosting": {
-        "production": [
-          "britops-1f219"
-        ],
         "staging": [
-          "britops-staging"
+          "britops-1f219"
+        ]
+      }
+    },
+    "theatrelog-84575": {
+      "hosting": {
+        "production": [
+          "theatrelog-84575"
         ]
       }
     }
-  },
-  "etags": {}
+  }
 }

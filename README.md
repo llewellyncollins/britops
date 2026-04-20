@@ -256,10 +256,12 @@ npm run test:e2e:ui    # Interactive UI mode
 
 ### Environments
 
-| Environment | Branch | Firebase Target | URL |
+| Environment | Branch | Firebase Project | URL |
 |---|---|---|---|
-| Staging | `main` | `britops-staging` | britops-staging.web.app |
-| Production | `production` | `britops-1f219` | theatrelog.uk |
+| Staging | `main` | `britops-1f219` | britops-1f219.web.app |
+| Production | `production` | `theatrelog-84575` | theatrelog.uk |
+
+Each environment lives in its own Firebase project (own Firestore, Auth, and Stripe extension). Deploys scope by project + hosting target: `firebase deploy --only hosting:<target> --project <alias>`.
 
 ### CI/CD Pipeline
 
@@ -277,7 +279,12 @@ Merge main → production
 
 ### Required GitHub Secrets
 
-`FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219` plus `STAGING_FIREBASE_*` and `PROD_FIREBASE_*` variants for all six Firebase config values.
+Service accounts (one per Firebase project):
+
+- `FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219` — staging (britops-1f219)
+- `FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575` — production (theatrelog-84575)
+
+Plus `STAGING_FIREBASE_*` and `PROD_FIREBASE_*` variants for all six Firebase web-app config values, and `STAGING_STRIPE_API_KEY` / `PROD_STRIPE_API_KEY` for the Stripe extension.
 
 ### Pre-Push Hook
 

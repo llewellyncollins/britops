@@ -293,10 +293,12 @@ vite --mode emulator
 
 ### Environments
 
-| Environment | Branch       | Firebase Target   | URL                     |
+| Environment | Branch       | Firebase Project  | URL                     |
 | ----------- | ------------ | ----------------- | ----------------------- |
-| Staging     | `main`       | `britops-staging` | britops-staging.web.app |
-| Production  | `production` | `britops-1f219`   | https://theatrelog.uk   |
+| Staging     | `main`       | `britops-1f219`   | britops-1f219.web.app   |
+| Production  | `production` | `theatrelog-84575`| https://theatrelog.uk   |
+
+Each environment is a separate Firebase project with its own Firestore, Auth, and Stripe extension. `.firebaserc` defines aliases `staging` → `britops-1f219`, `production` → `theatrelog-84575`, and hosting targets (`staging`, `production`) scoped to each project. Deploys use `firebase deploy --only hosting:<target> --project <alias>`.
 
 ### Flow
 
@@ -314,11 +316,17 @@ Merge main → production    → Deploy to production (requires GitHub environme
 | `ci.yml`                | Push to main/production, PR to main | lint-and-build (+ size check), unit-and-integration-tests, e2e-tests, lighthouse |
 | `deploy-staging.yml`    | CI passes on main                   | Build with STAGING secrets → Firebase deploy                                |
 | `deploy-production.yml` | CI passes on production             | Build with PROD secrets → Firebase deploy (environment gate)                |
-| `preview.yml`           | CI passes on PR                     | Build → Firebase preview channel                                            |
+| `preview.yml`           | CI passes on PR                     | Build → Firebase preview channel on staging project (britops-1f219)         |
 
 ### Required GitHub Secrets
 
-`FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219`, `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_AUTH_DOMAIN`, `STAGING_FIREBASE_PROJECT_ID`, `STAGING_FIREBASE_STORAGE_BUCKET`, `STAGING_FIREBASE_MESSAGING_SENDER_ID`, `STAGING_FIREBASE_APP_ID`, and `PROD_*` equivalents.
+Service accounts (one JSON key per Firebase project):
+- `FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219` — staging (britops-1f219)
+- `FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575` — production (theatrelog-84575)
+
+Web-app config (per environment): `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_AUTH_DOMAIN`, `STAGING_FIREBASE_PROJECT_ID`, `STAGING_FIREBASE_STORAGE_BUCKET`, `STAGING_FIREBASE_MESSAGING_SENDER_ID`, `STAGING_FIREBASE_APP_ID`, and `PROD_*` equivalents.
+
+Stripe: `STAGING_STRIPE_API_KEY` (test mode), `PROD_STRIPE_API_KEY` (live mode) — consumed by the Stripe extension params at deploy time.
 
 ### Local Pre-Push Hook
 

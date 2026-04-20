@@ -26,26 +26,27 @@ This is more reliable than client-side purging because it runs server-side regar
 
 ### Using gcloud CLI
 
+Production (theatrelog-84575):
+```bash
+gcloud firestore fields ttls update deletedAt \
+  --collection-group=operations \
+  --enable-ttl \
+  --project=theatrelog-84575
+```
+
+Staging (britops-1f219):
 ```bash
 gcloud firestore fields ttls update deletedAt \
   --collection-group=operations \
   --enable-ttl \
   --project=britops-1f219
-```
-
-For staging:
-```bash
-gcloud firestore fields ttls update deletedAt \
-  --collection-group=operations \
-  --enable-ttl \
-  --project=britops-staging
 ```
 
 ### Verify TTL is active
 
 ```bash
 gcloud firestore fields ttls list \
-  --project=britops-1f219
+  --project=theatrelog-84575
 ```
 
 ---

@@ -29,8 +29,8 @@ jobs:
           PARAMS
       - name: Deploy Firestore rules and extensions
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219 }}' > /tmp/sa.json
-          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules,extensions --project britops-1f219
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575 }}' > /tmp/sa.json
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules,extensions --project theatrelog-84575
       - run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
@@ -42,7 +42,7 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BRITOPS_1F219 }}
-          projectId: britops-1f219
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575 }}
+          projectId: theatrelog-84575
           target: production
           channelId: live
