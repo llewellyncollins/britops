@@ -30,7 +30,7 @@ jobs:
       - name: Deploy Firestore rules and extensions
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575 }}' > /tmp/sa.json
-          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules,extensions --project theatrelog-84575
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules,extensions --project theatrelog-84575 --non-interactive
       - run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
