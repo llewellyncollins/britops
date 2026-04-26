@@ -2,10 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useOperations } from '../hooks/useOperations';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useProcedureTypes } from '../hooks/useProcedureTypes';
-import { useTier } from '../hooks/useTier';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { PortfolioSummary } from '../components/portfolio/PortfolioSummary';
-import { UpgradeBanner } from '../components/common/UpgradeBanner';
 import { Calendar, ChevronDown } from 'lucide-react';
 import {
   trackPageView,
@@ -19,7 +17,6 @@ import {
 export function Portfolio() {
   const { operations } = useOperations();
   const { allProcedures, specialties } = useProcedureTypes();
-  const { can } = useTier();
   const {
     portfolioShowKpis, setPortfolioShowKpis,
     portfolioShowTimeline, setPortfolioShowTimeline,
@@ -75,34 +72,6 @@ export function Portfolio() {
   }, [filtered]);
 
   const maxMonthCount = Math.max(...monthlyData.map(([, n]) => n), 1);
-
-  if (!can('portfolio')) {
-    return (
-      <div className="p-4 max-w-2xl mx-auto">
-        <h1 className="text-xl font-bold mb-4">Portfolio Summary</h1>
-
-        {/* Blurred teaser */}
-        <div className="relative mb-6">
-          <div className="blur-sm pointer-events-none select-none" aria-hidden="true">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-              {['Total ops', '% Independent', 'Complication rate', 'MDT discussed'].map(label => (
-                <div key={label} className="p-3 text-center bg-surface-raised border border-border rounded-lg">
-                  <p className="text-xl font-bold text-heading">—</p>
-                  <p className="text-xs text-text-muted mt-0.5">{label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <UpgradeBanner
-          title="Unlock Portfolio Analytics"
-          description="Get ARCP-ready summaries, involvement breakdowns, activity trends, and export your portfolio as Excel — all with Theatrelog Pro."
-          feature="portfolio"
-        />
-      </div>
-    );
-  }
 
   function formatMonth(ym: string) {
     const [year, month] = ym.split('-');

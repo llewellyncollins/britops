@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { trackCustomProcedureAdded } from "../../firebase/analytics";
 import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { useProcedureTypes } from "../../hooks/useProcedureTypes";
-import { useTier } from "../../hooks/useTier";
 import { DEFAULT_PROCEDURES } from "../../data/procedures";
 import type { ProcedureType } from "../../types";
 
@@ -37,8 +35,6 @@ const EMPTY_FORM: NewProcedureForm = {
 export function ProcedureTypeManager() {
   const { allProcedures, customTypes, addProcedureType, removeProcedureType } =
     useProcedureTypes();
-  const { can } = useTier();
-  const navigate = useNavigate();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<NewProcedureForm>(EMPTY_FORM);
   const [expandedSpecialties, setExpandedSpecialties] = useState<Set<string>>(
@@ -119,7 +115,7 @@ export function ProcedureTypeManager() {
       {/* Add new procedure */}
       {!showAdd ? (
         <button
-          onClick={() => can('customProcedures') ? setShowAdd(true) : navigate('/upgrade')}
+          onClick={() => setShowAdd(true)}
           className="w-full flex items-center gap-2 p-3 border border-dashed border-border rounded-lg hover:border-accent text-accent text-sm font-medium transition-colors"
         >
           <Plus size={16} />

@@ -27,11 +27,10 @@ vi.mock('../hooks/useProcedureTypes', () => ({
 
 vi.mock('../hooks/useTier', () => ({
   useTier: vi.fn(() => ({
-    tier: 'paid',
+    tier: 'signed-in',
     can: () => true,
-    requiredTier: () => 'free',
+    requiredTier: () => 'signed-in',
     loading: false,
-    refreshClaims: vi.fn(),
   })),
 }));
 

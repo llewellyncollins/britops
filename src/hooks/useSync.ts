@@ -16,30 +16,23 @@ import {
 } from '../firebase/firestore';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { db } from '../db/dexie';
-import type { OperationEntry, ProcedureType, UserTier } from '../types';
+import type { OperationEntry, ProcedureType } from '../types';
 
-export function useSync(user: User | null, tier: UserTier = 'free') {
+export function useSync(user: User | null) {
   const [syncing, setSyncing] = useState(false);
 
   // Refs so Dexie hooks can read the latest values without re-registering
   const userRef = useRef<User | null>(null);
   const prevUserRef = useRef<User | null>(null);
-  const tierRef = useRef<UserTier>(tier);
-  const prevTierRef = useRef<UserTier>(tier);
   const timeoutIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Keep refs current
+  // Keep ref current
   useEffect(() => {
     userRef.current = user;
   }, [user]);
 
-  useEffect(() => {
-    prevTierRef.current = tierRef.current;
-    tierRef.current = tier;
-  }, [tier]);
-
   // ── Effect 1: Register Dexie hooks ONCE at mount ─────────────────────────
-  // Hooks are registered globally on the Dexie db; they read userRef/tierRef at
+  // Hooks are registered globally on the Dexie db; they read userRef at
   // execution time so they never need to be re-registered on auth changes.
   useEffect(() => {
     function schedule(fn: () => Promise<void>) {
@@ -57,7 +50,6 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
     const opsCreating = function (_primKey: unknown, obj: OperationEntry) {
       if (!userRef.current) { console.warn('[sync] opsCreating skipped — no user'); return; }
       if (!isConfigured) { console.warn('[sync] opsCreating skipped — Firebase not configured'); return; }
-      if (tierRef.current !== 'paid') { console.log('[sync] opsCreating skipped — not Pro tier'); return; }
       if (isSyncingFromFirestore) return;
       if (!navigator.onLine) { console.log('[sync] opsCreating queued (offline):', obj.id); return; }
       schedule(async () => {
@@ -76,7 +68,6 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
       obj: OperationEntry,
     ) {
       if (!userRef.current || !isConfigured || isSyncingFromFirestore) return;
-      if (tierRef.current !== 'paid') return;
       if (modifications.syncPending === false) return;
       if (!navigator.onLine) return;
       const pushed = { ...obj, ...modifications } as OperationEntry;
@@ -92,7 +83,6 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
 
     const ptCreating = function (_primKey: unknown, obj: ProcedureType) {
       if (!userRef.current || !isConfigured || !obj.isCustom) return;
-      if (tierRef.current !== 'paid') return;
       const uid = userRef.current.uid;
       schedule(async () => {
         await pushProcedureTypeToFirestore(uid, obj);
@@ -101,7 +91,6 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
 
     const ptDeleting = function (primKey: string) {
       if (!userRef.current || !isConfigured) return;
-      if (tierRef.current !== 'paid') return;
       const uid = userRef.current.uid;
       schedule(async () => {
         await deleteProcedureTypeFromFirestore(uid, primKey);
@@ -126,14 +115,9 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
   // ── Effect 2: Migrate pre-login data on first sign-in, then push pending ──
   useEffect(() => {
     if (user && !prevUserRef.current) {
-      // null → signed in: claim any 'local-user' operations
+      // null → signed in: claim any 'local-user' operations then sync
       migrateLocalOps(user.uid)
-        .then(() => {
-          // Only push to Firestore if paid
-          if (tierRef.current === 'paid') {
-            return pushPendingOps(user.uid);
-          }
-        })
+        .then(() => pushPendingOps(user.uid))
         .catch(console.error);
     }
     prevUserRef.current = user;
@@ -143,63 +127,50 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
   useEffect(() => {
     if (!user || !isConfigured) return;
 
-    // Operations & procedure types listeners only for paid tier
-    let unsubOps: (() => void) | undefined;
-    let unsubTypes: (() => void) | undefined;
+    const unsubOps = subscribeToFirestore(user.uid, async remoteEntries => {
+      setSyncing(true);
+      await syncFromFirestore(remoteEntries);
+      setSyncing(false);
+    });
 
-    if (tier === 'paid') {
-      unsubOps = subscribeToFirestore(user.uid, async remoteEntries => {
-        setSyncing(true);
-        await syncFromFirestore(remoteEntries);
-        setSyncing(false);
-      });
+    const unsubTypes = subscribeToProcedureTypes(user.uid, async remoteTypes => {
+      await syncProcedureTypesFromFirestore(remoteTypes);
+    });
 
-      unsubTypes = subscribeToProcedureTypes(user.uid, async remoteTypes => {
-        await syncProcedureTypesFromFirestore(remoteTypes);
-      });
-    }
-
-    // Settings listener active for all signed-in users (receives subscription updates too)
     const unsubSettings = subscribeToUserSettings(user.uid, (remoteSettings) => {
       useSettingsStore.getState().setSettings(remoteSettings);
     });
 
     return () => {
-      unsubOps?.();
-      unsubTypes?.();
+      unsubOps();
+      unsubTypes();
       unsubSettings();
     };
-  }, [user, tier]);
+  }, [user]);
 
   // ── Effect 4: Push settings changes to Firestore ──────────────────────────
   useEffect(() => {
     if (!user || !isConfigured) return;
 
     const unsub = useSettingsStore.subscribe((state) => {
-      const currentTier = tierRef.current;
-      // Push specialty for all signed-in users; grade only for paid
-      const settings = currentTier === 'paid'
-        ? { specialty: state.specialty, grade: state.grade }
-        : { specialty: state.specialty };
-      pushUserSettingsToFirestore(user.uid, settings).catch(console.error);
+      pushUserSettingsToFirestore(user.uid, {
+        specialty: state.specialty,
+        grade: state.grade,
+      }).catch(console.error);
     });
 
-    // Push current settings on first sign-in
+    // Push current settings on sign-in
     const { specialty, grade } = useSettingsStore.getState();
-    const settings = tier === 'paid'
-      ? { specialty, grade }
-      : { specialty };
-    pushUserSettingsToFirestore(user.uid, settings).catch(console.error);
+    pushUserSettingsToFirestore(user.uid, { specialty, grade }).catch(console.error);
 
     return unsub;
-  }, [user, tier]);
+  }, [user]);
 
   // ── Effect 5: Push pending operations when connectivity is restored ───────
   useEffect(() => {
     const handleOnline = () => {
       const uid = userRef.current?.uid;
       if (!uid || !isConfigured) return;
-      if (tierRef.current !== 'paid') return;
       pushPendingOps(uid).catch(console.error);
     };
 
@@ -207,19 +178,12 @@ export function useSync(user: User | null, tier: UserTier = 'free') {
     return () => window.removeEventListener('online', handleOnline);
   }, []); // mount only
 
-  // ── Effect 6: Flush queued ops when user upgrades to paid ─────────────────
-  useEffect(() => {
-    if (tier === 'paid' && prevTierRef.current !== 'paid' && user) {
-      pushPendingOps(user.uid).catch(console.error);
-    }
-  }, [tier, user]);
-
   return { syncing };
 }
 
 /**
  * Push all operations for a user that have `syncPending: true`.
- * Exported for use by Effects 2, 5, 6 as well as tests.
+ * Exported for use by Effects 2 and 5 as well as tests.
  */
 export async function pushPendingOps(userId: string): Promise<void> {
   const all = await db.operations.where('userId').equals(userId).toArray();

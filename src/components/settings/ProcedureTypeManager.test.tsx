@@ -5,7 +5,6 @@ import type { ProcedureType } from '../../types';
 
 vi.mock('../../firebase/analytics', () => ({
   trackCustomProcedureAdded: vi.fn(),
-  trackUpgradePrompted: vi.fn(),
 }));
 
 const mockAddProcedureType = vi.fn();
@@ -25,23 +24,11 @@ vi.mock('../../hooks/useProcedureTypes', () => ({
   })),
 }));
 
-const mockCan = vi.fn(() => true);
-vi.mock('../../hooks/useTier', () => ({
-  useTier: vi.fn(() => ({
-    tier: 'paid',
-    can: mockCan,
-    requiredTier: () => 'paid',
-    loading: false,
-    refreshClaims: vi.fn(),
-  })),
-}));
-
 const { ProcedureTypeManager } = await import('./ProcedureTypeManager');
 
 describe('ProcedureTypeManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCan.mockReturnValue(true);
   });
 
   it('renders add custom procedure button', () => {

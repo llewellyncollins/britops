@@ -1,22 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from '../../test/render-with-providers';
-import type { UserTier } from '../../types';
-
-vi.mock('../../firebase/analytics', () => ({
-  trackUpgradePrompted: vi.fn(),
-}));
 
 const mockCan = vi.fn(() => true);
-const mockRequiredTier = vi.fn((): UserTier => 'paid');
 
 vi.mock('../../hooks/useTier', () => ({
   useTier: vi.fn(() => ({
-    tier: 'paid',
+    tier: 'signed-in',
     can: mockCan,
-    requiredTier: mockRequiredTier,
+    requiredTier: () => 'signed-in',
     loading: false,
-    refreshClaims: vi.fn(),
   })),
 }));
 
@@ -26,7 +19,6 @@ describe('LockedFeature', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCan.mockReturnValue(true);
-    mockRequiredTier.mockReturnValue('paid');
   });
 
   it('renders children directly when user has access', () => {
@@ -36,28 +28,15 @@ describe('LockedFeature', () => {
       </LockedFeature>,
     );
     expect(screen.getByText('Portfolio content')).toBeInTheDocument();
-    expect(screen.queryByText('Pro')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
   });
 
-  it('shows Pro badge when user lacks paid tier', () => {
+  it('shows Sign in badge when user is not authenticated', () => {
     mockCan.mockReturnValue(false);
-    mockRequiredTier.mockReturnValue('paid');
 
     renderWithProviders(
       <LockedFeature feature="portfolio">
         <span>Portfolio content</span>
-      </LockedFeature>,
-    );
-    expect(screen.getByText('Pro')).toBeInTheDocument();
-  });
-
-  it('shows Sign in badge when user needs signed-in tier', () => {
-    mockCan.mockReturnValue(false);
-    mockRequiredTier.mockReturnValue('signed-in');
-
-    renderWithProviders(
-      <LockedFeature feature="import">
-        <span>Import content</span>
       </LockedFeature>,
     );
     expect(screen.getByText('Sign in')).toBeInTheDocument();
@@ -65,19 +44,17 @@ describe('LockedFeature', () => {
 
   it('has correct aria label for locked state', () => {
     mockCan.mockReturnValue(false);
-    mockRequiredTier.mockReturnValue('paid');
 
     renderWithProviders(
       <LockedFeature feature="portfolio">
         <span>Content</span>
       </LockedFeature>,
     );
-    expect(screen.getByLabelText(/Upgrade to Pro to unlock/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Sign in to unlock this feature')).toBeInTheDocument();
   });
 
-  it('navigates on click when locked', () => {
+  it('navigates to login on click when locked', () => {
     mockCan.mockReturnValue(false);
-    mockRequiredTier.mockReturnValue('paid');
 
     renderWithProviders(
       <LockedFeature feature="portfolio">
@@ -86,6 +63,6 @@ describe('LockedFeature', () => {
     );
 
     fireEvent.click(screen.getByRole('button'));
-    // Click triggers navigation — analytics tracked
+    // Click triggers navigation to /login
   });
 });

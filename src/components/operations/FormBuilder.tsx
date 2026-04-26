@@ -1,7 +1,6 @@
 import { Controller, type Control, type FieldValues } from 'react-hook-form';
 import { ProcedurePicker } from './ProcedurePicker';
 import { useProcedureTypes } from '../../hooks/useProcedureTypes';
-import { LockedFeature } from '../common/LockedFeature';
 import type { FieldMeta } from '../../data/formSchemas';
 
 interface FormBuilderProps {
@@ -104,10 +103,6 @@ function FieldRenderer({
         )}
       />
     );
-
-    if (field.key === 'grade') {
-      return <LockedFeature feature="gradeSetting">{selectField}</LockedFeature>;
-    }
 
     return selectField;
   }

@@ -2,40 +2,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper: is the caller a paid Pro subscriber? ──────────────────────────
-    function isPro() {
-      return request.auth.token.stripeRole == "pro";
-    }
-
-    // Operations — only the owning user with a Pro subscription may sync
+    // Operations — owning user may sync their own records
     match /operations/{opId} {
       allow read, delete: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && isPro();
+        && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid
-        && isPro();
+        && request.resource.data.userId == request.auth.uid;
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == request.auth.uid
-        && isPro();
+        && request.resource.data.userId == request.auth.uid;
     }
 
-    // Custom procedure types — Pro subscription required
+    // Custom procedure types — scoped to owning user
     match /procedureTypes/{typeId} {
       allow read, delete: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && isPro();
+        && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid
-        && isPro();
+        && request.resource.data.userId == request.auth.uid;
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == request.auth.uid
-        && isPro();
+        && request.resource.data.userId == request.auth.uid;
     }
 
-    // User settings — any signed-in user (specialty sync for free accounts)
+    // User settings — any signed-in user
     match /userSettings/{userId} {
       allow read, write: if request.auth != null
         && request.auth.uid == userId;
@@ -58,38 +47,6 @@ service cloud.firestore {
     match /supportLimits/{userId} {
       allow read, write: if request.auth != null
         && request.auth.uid == userId;
-    }
-
-    // ── Stripe Extension collections ─────────────────────────────────────────
-
-    // Customer records — users can read their own, write checkout sessions
-    match /customers/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-
-      match /checkout_sessions/{id} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
-      }
-
-      match /subscriptions/{id} {
-        allow read: if request.auth != null && request.auth.uid == uid;
-      }
-
-      match /payments/{id} {
-        allow read: if request.auth != null && request.auth.uid == uid;
-      }
-    }
-
-    // Products & prices — publicly readable (synced from Stripe Dashboard)
-    match /products/{id} {
-      allow read: if true;
-
-      match /prices/{priceId} {
-        allow read: if true;
-      }
-
-      match /tax_rates/{taxId} {
-        allow read: if true;
-      }
     }
 
     // Deny everything else

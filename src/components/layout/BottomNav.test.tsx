@@ -1,25 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../test/render-with-providers';
-
-const mockCan = vi.fn(() => true);
-
-vi.mock('../../hooks/useTier', () => ({
-  useTier: vi.fn(() => ({
-    tier: 'paid',
-    can: mockCan,
-    requiredTier: () => 'free',
-    loading: false,
-    refreshClaims: vi.fn(),
-  })),
-}));
 
 const { BottomNav } = await import('./BottomNav');
 
 describe('BottomNav', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCan.mockReturnValue(true);
   });
 
   it('renders all navigation items', () => {
@@ -38,14 +25,7 @@ describe('BottomNav', () => {
     expect(screen.getByText('Settings').closest('a')).toHaveAttribute('href', '/settings');
   });
 
-  it('shows lock icon on gated features when user cannot access', () => {
-    mockCan.mockReturnValue(false);
-    renderWithProviders(<BottomNav />);
-    expect(screen.getByLabelText('Pro feature')).toBeInTheDocument();
-  });
-
-  it('does not show lock icon when user has access', () => {
-    mockCan.mockReturnValue(true);
+  it('does not show lock icons on any nav items', () => {
     renderWithProviders(<BottomNav />);
     expect(screen.queryByLabelText('Pro feature')).not.toBeInTheDocument();
   });

@@ -12,15 +12,12 @@ vi.mock('../firebase/analytics', () => ({
   trackPortfolioSectionToggled: vi.fn(),
 }));
 
-const mockCan = vi.fn(() => true);
-
 vi.mock('../hooks/useTier', () => ({
   useTier: vi.fn(() => ({
-    tier: 'paid',
-    can: mockCan,
-    requiredTier: () => 'free',
+    tier: 'signed-in',
+    can: () => true,
+    requiredTier: () => 'signed-in',
     loading: false,
-    refreshClaims: vi.fn(),
   })),
 }));
 
@@ -51,7 +48,6 @@ const { Portfolio } = await import('./Portfolio');
 describe('Portfolio', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCan.mockReturnValue(true);
   });
 
   it('renders Portfolio Summary heading', () => {
@@ -109,14 +105,6 @@ describe('Portfolio', () => {
 
     fireEvent.click(overviewBtn);
     expect(screen.queryByText('Total ops')).not.toBeInTheDocument();
-  });
-
-  it('shows upgrade banner when user cannot access portfolio', () => {
-    mockCan.mockReturnValue(false);
-
-    renderWithProviders(<Portfolio />);
-    expect(screen.getByText('Unlock Portfolio Analytics')).toBeInTheDocument();
-    expect(screen.getByText(/Upgrade to Pro/)).toBeInTheDocument();
   });
 
   it('has date filter inputs', () => {

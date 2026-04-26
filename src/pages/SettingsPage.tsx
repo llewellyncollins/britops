@@ -29,12 +29,10 @@ import {
   trackPageView,
 } from '../firebase/analytics';
 import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManager';
-import { LockedFeature } from '../components/common/LockedFeature';
-import { TierBadge } from '../components/common/TierBadge';
 import {
   Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
   LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap, AlertTriangle,
-  Monitor, Sun, Moon, MessageCircle, CreditCard,
+  Monitor, Sun, Moon, MessageCircle,
 } from 'lucide-react';
 
 export function SettingsPage() {
@@ -44,7 +42,7 @@ export function SettingsPage() {
   const { specialty, setSpecialty, grade, setGrade, theme, setTheme } = useSettingsStore();
   const portfolioRows = usePortfolio(operations, allProcedures);
   const { user, isConfigured } = useAuth();
-  const { tier, can } = useTier();
+  const { can } = useTier();
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState('');
   const [showProcedures, setShowProcedures] = useState(false);
@@ -188,8 +186,7 @@ export function SettingsPage() {
       {/* Clinical Profile */}
       <section className="space-y-3">
         <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Clinical Profile</h2>
-        <LockedFeature feature="gradeSetting">
-          <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
+        <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
             <div className="flex items-start gap-3">
               <Stethoscope aria-hidden="true" size={20} className="text-accent mt-2 shrink-0" />
               <div className="flex-1 space-y-3">
@@ -209,14 +206,12 @@ export function SettingsPage() {
               </div>
             </div>
           </div>
-        </LockedFeature>
       </section>
 
       {/* Specialty */}
       <section className="space-y-3">
         <h2 id="settings-specialty-label" className="font-semibold text-text text-sm uppercase tracking-wide">Your Specialty</h2>
-        <LockedFeature feature="specialtySetting">
-          <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
             <GraduationCap aria-hidden="true" size={20} className="text-accent shrink-0" />
             <div className="flex-1">
               <select
@@ -236,7 +231,6 @@ export function SettingsPage() {
               </p>
             </div>
           </div>
-        </LockedFeature>
       </section>
 
       {/* Account */}
@@ -248,35 +242,10 @@ export function SettingsPage() {
               <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
                 <User aria-hidden="true" size={20} className="text-accent shrink-0" />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
-                    <TierBadge tier={tier} />
-                  </div>
-                  {tier === 'paid' ? (
-                    <p className="text-xs text-success">Syncing enabled</p>
-                  ) : (
-                    <p className="text-xs text-text-muted">
-                      <button
-                        type="button"
-                        onClick={() => navigate('/upgrade')}
-                        className="text-accent hover:underline"
-                      >
-                        Upgrade to Pro
-                      </button>
-                      {' '}to enable cloud sync
-                    </p>
-                  )}
+                  <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
+                  <p className="text-xs text-success">Syncing enabled</p>
                 </div>
               </div>
-              {tier === 'paid' && (
-                <button
-                  onClick={() => navigate('/upgrade')}
-                  className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text-muted hover:text-accent hover:border-accent transition-colors"
-                >
-                  <CreditCard aria-hidden="true" size={16} />
-                  Manage subscription
-                </button>
-              )}
               <button
                 onClick={() => { signOut(); trackSignOut(); }}
                 className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text hover:text-danger hover:border-danger transition-colors"
@@ -328,8 +297,7 @@ export function SettingsPage() {
       <section className="space-y-3">
         <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Export</h2>
 
-        <LockedFeature feature="exportXlsx">
-          <button
+        <button
             onClick={exportXlsx}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
@@ -339,9 +307,7 @@ export function SettingsPage() {
               <p className="text-xs text-text-muted">Download as .xlsx with summary + log</p>
             </div>
           </button>
-        </LockedFeature>
 
-        <LockedFeature feature="exportCsv">
           <button
             onClick={exportCSV}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
@@ -352,9 +318,7 @@ export function SettingsPage() {
               <p className="text-xs text-text-muted">Download all operations as CSV</p>
             </div>
           </button>
-        </LockedFeature>
 
-        <LockedFeature feature="exportJson">
           <button
             onClick={() => { if (user) { exportAllDataJson(user.uid); trackExport({ format: 'json' }); } }}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
@@ -365,7 +329,6 @@ export function SettingsPage() {
               <p className="text-xs text-text-muted">Complete data export for GDPR portability</p>
             </div>
           </button>
-        </LockedFeature>
       </section>
 
       {/* Import */}
@@ -379,9 +342,8 @@ export function SettingsPage() {
           onChange={handleImport}
           className="hidden"
         />
-        <LockedFeature feature="import">
-          <button
-            onClick={() => { if (can('import')) fileInputRef.current?.click(); }}
+        <button
+            onClick={() => { if (!user) { navigate('/login?returnTo=/settings'); return; } fileInputRef.current?.click(); }}
             disabled={importing}
             className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
           >
@@ -391,7 +353,6 @@ export function SettingsPage() {
               <p className="text-xs text-text-muted">Import operations from .xlsx logbook</p>
             </div>
           </button>
-        </LockedFeature>
         {importResult && (
           <p role="status" aria-live="polite" className={`text-sm ${importResult.includes('failed') ? 'text-danger' : 'text-success'}`}>
             {importResult}
@@ -434,9 +395,8 @@ export function SettingsPage() {
       {isConfigured && (
         <section className="space-y-3">
           <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Support</h2>
-          <LockedFeature feature="support">
-            <button
-              onClick={() => { trackSupportOpened(); navigate('/support'); }}
+          <button
+              onClick={() => { if (!user) { navigate('/login?returnTo=/support'); return; } trackSupportOpened(); navigate('/support'); }}
               className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
             >
               <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />
@@ -446,7 +406,6 @@ export function SettingsPage() {
               </div>
               <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />
             </button>
-          </LockedFeature>
         </section>
       )}
 
@@ -505,7 +464,7 @@ export function SettingsPage() {
         <p className="text-sm text-text-muted">Theatrelog v0.2.0 — Surgical operation logbook</p>
         <p className="text-xs text-text-muted">
           Data stored locally on device.{' '}
-          {tier === 'paid' ? 'Cloud sync active.' : isConfigured ? 'Upgrade to Pro for cloud sync.' : 'Configure Firebase for cloud sync.'}
+          {user && isConfigured ? 'Cloud sync active.' : isConfigured ? 'Sign in for cloud sync.' : 'Configure Firebase for cloud sync.'}
         </p>
         <p className="text-xs text-text-muted">
           Deleted operations are permanently purged after 30 days.

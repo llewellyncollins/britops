@@ -254,40 +254,14 @@ Emulator UI: http://127.0.0.1:4000
 
 | Email | Password | Tier |
 |---|---|---|
-| `free@test.com` | `password123` | Free (no stripeRole claim) |
-| `pro@test.com` | `password123` | Pro (stripeRole: "pro" custom claim) |
+| `free@test.com` | `password123` | Use without signing in (offline mode) |
+| `signed-in@test.com` | `password123` | Signed in (all features available) |
 
 ### How It Works
 
 - Auth (port 9099) + Firestore (port 8080) + Functions (port 5001) run locally
 - `demo-britops` project ID causes the Firebase SDK to refuse all real network calls
 - Emulator state persists between runs in `.emulator-data/` (gitignored)
-- Stripe checkout and billing portal are **mocked** in emulator mode — use `npm run dev` (staging) to test real Stripe payments with test cards
-
-### Stripe Testing
-
-| Mode | Command | Notes |
-|---|---|---|
-| Pro features (no Stripe) | `npm run dev:emulator`, sign in as `pro@test.com` | Custom claim set by seed script |
-| Real checkout | `npm run dev` (staging) | Use card `4242 4242 4242 4242` |
-| Full local webhook loop | See advanced docs below | Requires Stripe CLI |
-
-**Stripe test cards (staging mode):**
-- `4242 4242 4242 4242` — success
-- `4000 0025 0000 3155` — 3DS required
-- `4000 0000 0000 9995` — declined
-
-**Full local webhook loop (advanced):**
-```bash
-# Terminal 1 — emulators
-npm run emulator:start
-
-# Terminal 2 — Stripe CLI forwards webhooks to local Functions emulator
-stripe listen --forward-to http://127.0.0.1:5001/demo-britops/europe-west2/ext-firestore-stripe-payments-handleWebhookEvents
-
-# Terminal 3 — Vite
-vite --mode emulator
-```
 
 ## Deployment Pipeline
 
@@ -298,7 +272,7 @@ vite --mode emulator
 | Staging     | `main`       | `britops-1f219`   | britops-1f219.web.app   |
 | Production  | `production` | `theatrelog-84575`| https://theatrelog.uk   |
 
-Each environment is a separate Firebase project with its own Firestore, Auth, and Stripe extension. `.firebaserc` defines aliases `staging` → `britops-1f219`, `production` → `theatrelog-84575`, and hosting targets (`staging`, `production`) scoped to each project. Deploys use `firebase deploy --only hosting:<target> --project <alias>`.
+Each environment is a separate Firebase project with its own Firestore and Auth. `.firebaserc` defines aliases `staging` → `britops-1f219`, `production` → `theatrelog-84575`, and hosting targets (`staging`, `production`) scoped to each project. Deploys use `firebase deploy --only hosting:<target> --project <alias>`.
 
 ### Flow
 
@@ -325,8 +299,6 @@ Service accounts (one JSON key per Firebase project):
 - `FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575` — production (theatrelog-84575)
 
 Web-app config (per environment): `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_AUTH_DOMAIN`, `STAGING_FIREBASE_PROJECT_ID`, `STAGING_FIREBASE_STORAGE_BUCKET`, `STAGING_FIREBASE_MESSAGING_SENDER_ID`, `STAGING_FIREBASE_APP_ID`, and `PROD_*` equivalents.
-
-Stripe: `STAGING_STRIPE_API_KEY` (test mode), `PROD_STRIPE_API_KEY` (live mode) — consumed by the Stripe extension params at deploy time.
 
 ### Local Pre-Push Hook
 

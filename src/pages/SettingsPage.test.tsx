@@ -29,7 +29,6 @@ vi.mock('../firebase/analytics', () => ({
   trackSupportOpened: vi.fn(),
   trackPrivacyPolicyViewed: vi.fn(),
   trackTermsViewed: vi.fn(),
-  trackUpgradePrompted: vi.fn(),
   trackCustomProcedureAdded: vi.fn(),
 }));
 
@@ -55,11 +54,10 @@ vi.mock('../hooks/useProcedureTypes', () => ({
 const mockCan = vi.fn(() => true);
 vi.mock('../hooks/useTier', () => ({
   useTier: vi.fn(() => ({
-    tier: 'paid',
+    tier: 'signed-in',
     can: mockCan,
-    requiredTier: () => 'free',
+    requiredTier: () => 'signed-in',
     loading: false,
-    refreshClaims: vi.fn(),
   })),
 }));
 
@@ -165,12 +163,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('Get help or report an issue')).toBeInTheDocument();
   });
 
-  it('shows manage subscription for paid tier', () => {
-    renderWithProviders(<SettingsPage />);
-    expect(screen.getByText('Manage subscription')).toBeInTheDocument();
-  });
-
-  it('shows syncing enabled for paid tier', () => {
+  it('shows syncing enabled for signed-in user', () => {
     renderWithProviders(<SettingsPage />);
     expect(screen.getByText('Syncing enabled')).toBeInTheDocument();
   });

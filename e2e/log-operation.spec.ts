@@ -18,7 +18,8 @@ test.describe('Log Operation', () => {
     // Fill patient ID
     await page.getByPlaceholder('Hospital number').fill('PT001');
 
-    // Grade field is locked behind Pro for free users, so skip it
+    // Fill grade
+    await page.locator('select#grade').selectOption({ index: 1 });
 
     // Fill diagnosis
     await page.getByPlaceholder('e.g., Gr 2 EEC').fill('Gallstone disease');
@@ -44,28 +45,14 @@ test.describe('Log Operation', () => {
     await expect(page.getByText('Gallstone disease')).toBeVisible();
   });
 
-  test('grade field is locked for free users', async ({ page }) => {
+  test('grade field is always accessible', async ({ page }) => {
     await page.getByRole('link', { name: 'Log Op' }).click();
     await expect(page.getByRole('heading', { name: 'Log Operation' })).toBeVisible();
 
-    // Grade field should be behind a Pro lock for free users
-    const lockOverlay = page.getByRole('button', { name: /unlock this feature/i });
-    await expect(lockOverlay).toBeVisible();
-
-    // The underlying select should still exist but be inaccessible
+    // Grade field should be accessible to all users (no lock overlay)
     const gradeSelect = page.locator('select#grade');
-    await expect(gradeSelect).toBeAttached();
-  });
-
-  test('grade pre-fills from settings', async ({ page }) => {
-    // Set grade in settings first — grade setting is also locked for free users
-    // so this test verifies the settings grade dropdown behavior
-    await page.getByRole('link', { name: 'Settings' }).click();
-
-    // Trainee grade in settings is also locked for free users
-    // Verify the lock overlay is present
-    const lockOverlay = page.getByRole('button', { name: /unlock this feature/i });
-    await expect(lockOverlay.first()).toBeVisible();
+    await expect(gradeSelect).toBeVisible();
+    await expect(page.getByRole('button', { name: /unlock this feature/i })).not.toBeVisible();
   });
 
   test('save button is disabled without procedures selected', async ({ page }) => {

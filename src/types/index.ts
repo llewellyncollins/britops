@@ -1,6 +1,6 @@
 export type InvolvementLevel = 'assistant' | 'supervised' | 'independent';
 
-export type UserTier = 'free' | 'signed-in' | 'paid';
+export type UserTier = 'free' | 'signed-in';
 
 export type GatedFeature =
   | 'sync'

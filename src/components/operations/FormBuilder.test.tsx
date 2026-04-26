@@ -16,19 +16,6 @@ vi.mock('../../hooks/useProcedureTypes', () => ({
   })),
 }));
 
-vi.mock('../../hooks/useTier', () => ({
-  useTier: vi.fn(() => ({
-    tier: 'paid',
-    can: () => true,
-    requiredTier: () => 'free',
-    loading: false,
-    refreshClaims: vi.fn(),
-  })),
-}));
-
-vi.mock('../../firebase/analytics', () => ({
-  trackUpgradePrompted: vi.fn(),
-}));
 
 function TestWrapper({ fields }: { fields: FieldMeta[] }) {
   const { control } = useForm({

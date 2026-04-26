@@ -3,10 +3,6 @@ import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../test/render-with-providers';
 import { createOperation } from '../../test/factories';
 
-vi.mock('../../firebase/analytics', () => ({
-  trackUpgradePrompted: vi.fn(),
-}));
-
 vi.mock('../../hooks/useOperations', () => ({
   useOperations: vi.fn(() => ({
     operations: [],
@@ -30,11 +26,10 @@ vi.mock('../../hooks/useProcedureTypes', () => ({
 
 vi.mock('../../hooks/useTier', () => ({
   useTier: vi.fn(() => ({
-    tier: 'paid',
+    tier: 'signed-in',
     can: () => true,
-    requiredTier: () => 'free',
+    requiredTier: () => 'signed-in',
     loading: false,
-    refreshClaims: vi.fn(),
   })),
 }));
 
