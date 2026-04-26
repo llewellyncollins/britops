@@ -1,9 +1,9 @@
-import { type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
-import { cn } from '../../lib/utils';
-import { useTier } from '../../hooks/useTier';
-import type { GatedFeature } from '../../types';
+import { type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { Lock } from "lucide-react";
+import { cn } from "../../lib/utils";
+import { useTier } from "../../hooks/useTier";
+import type { GatedFeature } from "../../types";
 
 interface LockedFeatureProps {
   feature: GatedFeature;
@@ -11,11 +11,11 @@ interface LockedFeatureProps {
   className?: string;
 }
 
-export function LockedFeature({ feature, children, className }: LockedFeatureProps) {
+export function LockedFeature({ children, className }: LockedFeatureProps) {
   const { can } = useTier();
   const navigate = useNavigate();
 
-  if (can(feature)) {
+  if (can()) {
     return <>{children}</>;
   }
 
@@ -30,11 +30,17 @@ export function LockedFeature({ feature, children, className }: LockedFeaturePro
       role="button"
       tabIndex={0}
       onClick={handleClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e as unknown as React.MouseEvent); }}
-      className={cn('relative cursor-pointer group', className)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ")
+          handleClick(e as unknown as React.MouseEvent);
+      }}
+      className={cn("relative cursor-pointer group", className)}
       aria-label="Sign in to unlock this feature"
     >
-      <div className="opacity-40 pointer-events-none select-none" aria-hidden="true">
+      <div
+        className="opacity-40 pointer-events-none select-none"
+        aria-hidden="true"
+      >
         {children}
       </div>
       <div className="absolute inset-0 flex items-center justify-center">

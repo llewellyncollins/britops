@@ -1,16 +1,16 @@
-import { useRef, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { db } from '../db/dexie';
-import { useOperations } from '../hooks/useOperations';
-import { usePortfolio } from '../hooks/usePortfolio';
-import { useProcedureTypes } from '../hooks/useProcedureTypes';
-import { useAuth } from '../hooks/useAuth';
-import { useTier } from '../hooks/useTier';
-import { useSettingsStore } from '../stores/useSettingsStore';
-import { TRAINEE_GRADES } from '../data/grades';
-import { exportPortfolioXlsx, importFromXlsx } from '../utils/excel';
-import { exportAllDataJson } from '../utils/export';
-import { signOut, deleteAccount } from '../firebase/auth';
+import { useRef, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { db } from "../db/dexie";
+import { useOperations } from "../hooks/useOperations";
+import { usePortfolio } from "../hooks/usePortfolio";
+import { useProcedureTypes } from "../hooks/useProcedureTypes";
+import { useAuth } from "../hooks/useAuth";
+import { useTier } from "../hooks/useTier";
+import { useSettingsStore } from "../stores/useSettingsStore";
+import { TRAINEE_GRADES } from "../data/grades";
+import { exportPortfolioXlsx, importFromXlsx } from "../utils/excel";
+import { exportAllDataJson } from "../utils/export";
+import { signOut, deleteAccount } from "../firebase/auth";
 import {
   trackSignOut,
   trackSignInPrompted,
@@ -27,34 +27,53 @@ import {
   trackPrivacyPolicyViewed,
   trackTermsViewed,
   trackPageView,
-} from '../firebase/analytics';
-import { ProcedureTypeManager } from '../components/settings/ProcedureTypeManager';
+} from "../firebase/analytics";
+import { ProcedureTypeManager } from "../components/settings/ProcedureTypeManager";
 import {
-  Download, Upload, Trash2, FileSpreadsheet, FileJson, Shield, ExternalLink,
-  LogOut, LogIn, User, Stethoscope, ChevronDown, ChevronRight, GraduationCap, AlertTriangle,
-  Monitor, Sun, Moon, MessageCircle,
-} from 'lucide-react';
+  Download,
+  Upload,
+  Trash2,
+  FileSpreadsheet,
+  FileJson,
+  Shield,
+  ExternalLink,
+  LogOut,
+  LogIn,
+  User,
+  Stethoscope,
+  ChevronDown,
+  ChevronRight,
+  GraduationCap,
+  AlertTriangle,
+  Monitor,
+  Sun,
+  Moon,
+  MessageCircle,
+} from "lucide-react";
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const { operations, addOperation } = useOperations();
   const { allProcedures, specialties } = useProcedureTypes();
-  const { specialty, setSpecialty, grade, setGrade, theme, setTheme } = useSettingsStore();
+  const { specialty, setSpecialty, grade, setGrade, theme, setTheme } =
+    useSettingsStore();
   const portfolioRows = usePortfolio(operations, allProcedures);
   const { user, isConfigured } = useAuth();
   const { can } = useTier();
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState('');
+  const [importResult, setImportResult] = useState("");
   const [showProcedures, setShowProcedures] = useState(false);
 
   useEffect(() => {
-    document.title = 'Settings — Theatrelog';
-    trackPageView({ page_name: 'Settings' });
-    return () => { document.title = 'Theatrelog'; };
+    document.title = "Settings — Theatrelog";
+    trackPageView({ page_name: "Settings" });
+    return () => {
+      document.title = "Theatrelog";
+    };
   }, []);
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(0);
   const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
+  const [deleteError, setDeleteError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleDeleteAccount() {
@@ -65,14 +84,16 @@ export function SettingsPage() {
     }
     trackAccountDeleteConfirmed();
     setDeleting(true);
-    setDeleteError('');
+    setDeleteError("");
     try {
       await deleteAccount();
-      navigate('/login');
+      navigate("/login");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Deletion failed';
-      if (msg.includes('requires-recent-login')) {
-        setDeleteError('Please sign out and sign back in, then try again. Firebase requires recent authentication for account deletion.');
+      const msg = err instanceof Error ? err.message : "Deletion failed";
+      if (msg.includes("requires-recent-login")) {
+        setDeleteError(
+          "Please sign out and sign back in, then try again. Firebase requires recent authentication for account deletion.",
+        );
       } else {
         setDeleteError(msg);
       }
@@ -82,50 +103,73 @@ export function SettingsPage() {
   }
 
   async function exportXlsx() {
-    if (!can('exportXlsx')) return;
+    if (!can()) return;
     exportPortfolioXlsx(operations, portfolioRows, allProcedures);
-    trackExport({ format: 'xlsx' });
+    trackExport({ format: "xlsx" });
   }
 
   async function exportCSV() {
-    if (!can('exportCsv')) return;
-    const ops = operations.filter(op => !op.deleted);
+    if (!can()) return;
+    const ops = operations.filter((op) => !op.deleted);
     const headers = [
-      'Date', 'Patient ID', 'Diagnosis', 'Procedures', 'Involvement',
-      'Other Details', 'Intra-op Complications', 'Post-op Complications',
-      'Histology', 'Follow Up', 'Complexity Score', 'PCI', 'Discussed MDT', 'Notes',
+      "Date",
+      "Patient ID",
+      "Diagnosis",
+      "Procedures",
+      "Involvement",
+      "Other Details",
+      "Intra-op Complications",
+      "Post-op Complications",
+      "Histology",
+      "Follow Up",
+      "Complexity Score",
+      "PCI",
+      "Discussed MDT",
+      "Notes",
     ];
-    const rows = ops.map(op => {
+    const rows = ops.map((op) => {
       const procNames = op.procedures
-        .map(id => allProcedures.find(p => p.id === id))
+        .map((id) => allProcedures.find((p) => p.id === id))
         .filter(Boolean)
-        .map(p => p!.subcategory ? `${p!.name} (${p!.subcategory})` : p!.name)
-        .join('; ');
+        .map((p) =>
+          p!.subcategory ? `${p!.name} (${p!.subcategory})` : p!.name,
+        )
+        .join("; ");
       return [
-        op.date, op.patientId, op.diagnosis, procNames, op.involvement,
-        op.otherDetails, op.intraOpComplications, op.postOpComplications,
-        op.histology, op.followUp ? 'Yes' : 'No', op.complexityScore ?? '', op.pci ?? '',
-        op.discussedMDT ? 'Yes' : 'No', op.notes,
+        op.date,
+        op.patientId,
+        op.diagnosis,
+        procNames,
+        op.involvement,
+        op.otherDetails,
+        op.intraOpComplications,
+        op.postOpComplications,
+        op.histology,
+        op.followUp ? "Yes" : "No",
+        op.complexityScore ?? "",
+        op.pci ?? "",
+        op.discussedMDT ? "Yes" : "No",
+        op.notes,
       ];
     });
     const csv = [headers, ...rows]
-      .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `theatrelog-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `theatrelog-export-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    trackExport({ format: 'csv' });
+    trackExport({ format: "csv" });
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
-    setImportResult('');
+    setImportResult("");
     try {
       const entries = await importFromXlsx(file, allProcedures);
       let count = 0;
@@ -136,15 +180,17 @@ export function SettingsPage() {
       setImportResult(`Imported ${count} operations successfully`);
       trackImport({ row_count: count });
     } catch (err: unknown) {
-      setImportResult(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setImportResult(
+        `Import failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     } finally {
       setImporting(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
   async function clearData() {
-    if (confirm('Are you sure? This will delete all local operations.')) {
+    if (confirm("Are you sure? This will delete all local operations.")) {
       await db.operations.clear();
       trackDataCleared();
     }
@@ -156,23 +202,30 @@ export function SettingsPage() {
 
       {/* Appearance */}
       <section className="space-y-3">
-        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Appearance</h2>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+          Appearance
+        </h2>
         <div className="p-3 bg-surface-raised border border-border rounded-lg space-y-2">
           <p className="text-sm font-medium text-text">Theme</p>
           <div className="flex gap-2">
-            {([
-              { value: 'system', label: 'System', Icon: Monitor },
-              { value: 'light',  label: 'Light',  Icon: Sun },
-              { value: 'dark',   label: 'Dark',   Icon: Moon },
-            ] as const).map(({ value, label, Icon }) => (
+            {(
+              [
+                { value: "system", label: "System", Icon: Monitor },
+                { value: "light", label: "Light", Icon: Sun },
+                { value: "dark", label: "Dark", Icon: Moon },
+              ] as const
+            ).map(({ value, label, Icon }) => (
               <button
                 key={value}
-                onClick={() => { setTheme(value); trackThemeChanged({ theme: value }); }}
+                onClick={() => {
+                  setTheme(value);
+                  trackThemeChanged({ theme: value });
+                }}
                 aria-pressed={theme === value}
                 className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-colors ${
                   theme === value
-                    ? 'bg-primary text-white'
-                    : 'bg-surface border border-border text-text-muted hover:border-primary-light'
+                    ? "bg-primary text-white"
+                    : "bg-surface border border-border text-text-muted hover:border-primary-light"
                 }`}
               >
                 <Icon size={18} aria-hidden="true" />
@@ -185,69 +238,115 @@ export function SettingsPage() {
 
       {/* Clinical Profile */}
       <section className="space-y-3">
-        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Clinical Profile</h2>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+          Clinical Profile
+        </h2>
         <div className="space-y-3 p-3 bg-surface-raised border border-border rounded-lg">
-            <div className="flex items-start gap-3">
-              <Stethoscope aria-hidden="true" size={20} className="text-accent mt-2 shrink-0" />
-              <div className="flex-1 space-y-3">
-                <div>
-                  <label htmlFor="settings-grade" className="block text-sm font-medium text-text mb-1">Trainee grade</label>
-                  <select
-                    id="settings-grade"
-                    value={grade ?? ''}
-                    onChange={e => { setGrade(e.target.value || null); trackGradeSet({ has_grade: !!e.target.value }); }}
-                    className="input"
-                  >
-                    <option value="">Not set</option>
-                    {TRAINEE_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                </div>
-                <p className="text-xs text-text-muted">Pre-fills grade on each new operation you log</p>
+          <div className="flex items-start gap-3">
+            <Stethoscope
+              aria-hidden="true"
+              size={20}
+              className="text-accent mt-2 shrink-0"
+            />
+            <div className="flex-1 space-y-3">
+              <div>
+                <label
+                  htmlFor="settings-grade"
+                  className="block text-sm font-medium text-text mb-1"
+                >
+                  Trainee grade
+                </label>
+                <select
+                  id="settings-grade"
+                  value={grade ?? ""}
+                  onChange={(e) => {
+                    setGrade(e.target.value || null);
+                    trackGradeSet({ has_grade: !!e.target.value });
+                  }}
+                  className="input"
+                >
+                  <option value="">Not set</option>
+                  {TRAINEE_GRADES.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
               </div>
+              <p className="text-xs text-text-muted">
+                Pre-fills grade on each new operation you log
+              </p>
             </div>
           </div>
+        </div>
       </section>
 
       {/* Specialty */}
       <section className="space-y-3">
-        <h2 id="settings-specialty-label" className="font-semibold text-text text-sm uppercase tracking-wide">Your Specialty</h2>
+        <h2
+          id="settings-specialty-label"
+          className="font-semibold text-text text-sm uppercase tracking-wide"
+        >
+          Your Specialty
+        </h2>
         <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-            <GraduationCap aria-hidden="true" size={20} className="text-accent shrink-0" />
-            <div className="flex-1">
-              <select
-                id="settings-specialty"
-                aria-labelledby="settings-specialty-label"
-                value={specialty ?? ''}
-                onChange={e => { setSpecialty(e.target.value || null); trackSpecialtySet({ has_specialty: !!e.target.value }); }}
-                className="input"
-              >
-                <option value="">Not set (show all fields)</option>
-                {specialties.map(sp => (
-                  <option key={sp} value={sp}>{sp}</option>
-                ))}
-              </select>
-              <p className="text-xs text-text-muted mt-1">
-                Tailors the operation form to show fields relevant to your specialty
-              </p>
-            </div>
+          <GraduationCap
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
+          <div className="flex-1">
+            <select
+              id="settings-specialty"
+              aria-labelledby="settings-specialty-label"
+              value={specialty ?? ""}
+              onChange={(e) => {
+                setSpecialty(e.target.value || null);
+                trackSpecialtySet({ has_specialty: !!e.target.value });
+              }}
+              className="input"
+            >
+              <option value="">Not set (show all fields)</option>
+              {specialties.map((sp) => (
+                <option key={sp} value={sp}>
+                  {sp}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-text-muted mt-1">
+              Tailors the operation form to show fields relevant to your
+              specialty
+            </p>
           </div>
+        </div>
       </section>
 
       {/* Account */}
       {isConfigured && (
         <section className="space-y-3">
-          <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Account</h2>
+          <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+            Account
+          </h2>
           {user ? (
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg">
-                <User aria-hidden="true" size={20} className="text-accent shrink-0" />
+                <User
+                  aria-hidden="true"
+                  size={20}
+                  className="text-accent shrink-0"
+                />
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{user.email ?? 'Signed in'}</p>
+                  <p className="font-medium text-sm">
+                    {user.email ?? "Signed in"}
+                  </p>
                   <p className="text-xs text-success">Syncing enabled</p>
                 </div>
               </div>
               <button
-                onClick={() => { signOut(); trackSignOut(); }}
+                onClick={() => {
+                  signOut();
+                  trackSignOut();
+                }}
                 className="w-full flex items-center justify-center gap-2 p-2.5 border border-border rounded-lg text-sm font-medium text-text hover:text-danger hover:border-danger transition-colors"
               >
                 <LogOut aria-hidden="true" size={16} />
@@ -256,13 +355,22 @@ export function SettingsPage() {
             </div>
           ) : (
             <button
-              onClick={() => { navigate('/login?returnTo=/settings'); trackSignInPrompted({ source: 'settings' }); }}
+              onClick={() => {
+                navigate("/login?returnTo=/settings");
+                trackSignInPrompted({ source: "settings" });
+              }}
               className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
             >
-              <LogIn aria-hidden="true" size={20} className="text-accent shrink-0" />
+              <LogIn
+                aria-hidden="true"
+                size={20}
+                className="text-accent shrink-0"
+              />
               <div className="text-left">
                 <p className="font-medium text-sm">Sign in</p>
-                <p className="text-xs text-text-muted">Unlock imports, support, and more</p>
+                <p className="text-xs text-text-muted">
+                  Unlock imports, support, and more
+                </p>
               </div>
             </button>
           )}
@@ -272,22 +380,45 @@ export function SettingsPage() {
       {/* Procedure Types */}
       <section className="space-y-3">
         <button
-          onClick={() => { if (!showProcedures) trackProcedureTypesOpened(); setShowProcedures(!showProcedures); }}
+          onClick={() => {
+            if (!showProcedures) trackProcedureTypesOpened();
+            setShowProcedures(!showProcedures);
+          }}
           aria-expanded={showProcedures}
           aria-controls="settings-procedures-panel"
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Stethoscope aria-hidden="true" size={20} className="text-accent shrink-0" />
+          <Stethoscope
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
           <div className="text-left flex-1">
             <p className="font-medium text-sm text-text">Procedure Types</p>
             <p className="text-xs text-text-muted">
-              Add custom procedures or browse {allProcedures.length} built-in entries
+              Add custom procedures or browse {allProcedures.length} built-in
+              entries
             </p>
           </div>
-          {showProcedures ? <ChevronDown aria-hidden="true" size={16} className="text-text-muted" /> : <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />}
+          {showProcedures ? (
+            <ChevronDown
+              aria-hidden="true"
+              size={16}
+              className="text-text-muted"
+            />
+          ) : (
+            <ChevronRight
+              aria-hidden="true"
+              size={16}
+              className="text-text-muted"
+            />
+          )}
         </button>
         {showProcedures && (
-          <div id="settings-procedures-panel" className="border border-border rounded-lg p-4">
+          <div
+            id="settings-procedures-panel"
+            className="border border-border rounded-lg p-4"
+          >
             <ProcedureTypeManager />
           </div>
         )}
@@ -295,45 +426,72 @@ export function SettingsPage() {
 
       {/* Export */}
       <section className="space-y-3">
-        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Export</h2>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+          Export
+        </h2>
 
         <button
-            onClick={exportXlsx}
-            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-          >
-            <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
-            <div className="text-left">
-              <p className="font-medium text-sm">Export Portfolio (Excel)</p>
-              <p className="text-xs text-text-muted">Download as .xlsx with summary + log</p>
-            </div>
-          </button>
+          onClick={exportXlsx}
+          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+        >
+          <FileSpreadsheet
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
+          <div className="text-left">
+            <p className="font-medium text-sm">Export Portfolio (Excel)</p>
+            <p className="text-xs text-text-muted">
+              Download as .xlsx with summary + log
+            </p>
+          </div>
+        </button>
 
-          <button
-            onClick={exportCSV}
-            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-          >
-            <Download aria-hidden="true" size={20} className="text-accent shrink-0" />
-            <div className="text-left">
-              <p className="font-medium text-sm">Export to CSV</p>
-              <p className="text-xs text-text-muted">Download all operations as CSV</p>
-            </div>
-          </button>
+        <button
+          onClick={exportCSV}
+          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+        >
+          <Download
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
+          <div className="text-left">
+            <p className="font-medium text-sm">Export to CSV</p>
+            <p className="text-xs text-text-muted">
+              Download all operations as CSV
+            </p>
+          </div>
+        </button>
 
-          <button
-            onClick={() => { if (user) { exportAllDataJson(user.uid); trackExport({ format: 'json' }); } }}
-            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-          >
-            <FileJson aria-hidden="true" size={20} className="text-accent shrink-0" />
-            <div className="text-left">
-              <p className="font-medium text-sm">Export All My Data (JSON)</p>
-              <p className="text-xs text-text-muted">Complete data export for GDPR portability</p>
-            </div>
-          </button>
+        <button
+          onClick={() => {
+            if (user) {
+              exportAllDataJson(user.uid);
+              trackExport({ format: "json" });
+            }
+          }}
+          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+        >
+          <FileJson
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
+          <div className="text-left">
+            <p className="font-medium text-sm">Export All My Data (JSON)</p>
+            <p className="text-xs text-text-muted">
+              Complete data export for GDPR portability
+            </p>
+          </div>
+        </button>
       </section>
 
       {/* Import */}
       <section className="space-y-3">
-        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Import</h2>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+          Import
+        </h2>
 
         <input
           ref={fileInputRef}
@@ -343,18 +501,36 @@ export function SettingsPage() {
           className="hidden"
         />
         <button
-            onClick={() => { if (!user) { navigate('/login?returnTo=/settings'); return; } fileInputRef.current?.click(); }}
-            disabled={importing}
-            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-          >
-            <Upload aria-hidden="true" size={20} className="text-accent shrink-0" />
-            <div className="text-left">
-              <p className="font-medium text-sm">{importing ? 'Importing...' : 'Import from Excel'}</p>
-              <p className="text-xs text-text-muted">Import operations from .xlsx logbook</p>
-            </div>
-          </button>
+          onClick={() => {
+            if (!user) {
+              navigate("/login?returnTo=/settings");
+              return;
+            }
+            fileInputRef.current?.click();
+          }}
+          disabled={importing}
+          className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+        >
+          <Upload
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
+          <div className="text-left">
+            <p className="font-medium text-sm">
+              {importing ? "Importing..." : "Import from Excel"}
+            </p>
+            <p className="text-xs text-text-muted">
+              Import operations from .xlsx logbook
+            </p>
+          </div>
+        </button>
         {importResult && (
-          <p role="status" aria-live="polite" className={`text-sm ${importResult.includes('failed') ? 'text-danger' : 'text-success'}`}>
+          <p
+            role="status"
+            aria-live="polite"
+            className={`text-sm ${importResult.includes("failed") ? "text-danger" : "text-success"}`}
+          >
             {importResult}
           </p>
         )}
@@ -362,19 +538,31 @@ export function SettingsPage() {
 
       {/* Privacy & Data */}
       <section className="space-y-3">
-        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Privacy &amp; Data</h2>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+          Privacy &amp; Data
+        </h2>
 
         <Link
           to="/privacy"
           onClick={() => trackPrivacyPolicyViewed()}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <Shield aria-hidden="true" size={20} className="text-accent shrink-0" />
+          <Shield
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Privacy Policy</p>
-            <p className="text-xs text-text-muted">How your data is collected, stored, and protected</p>
+            <p className="text-xs text-text-muted">
+              How your data is collected, stored, and protected
+            </p>
           </div>
-          <ExternalLink aria-hidden="true" size={16} className="text-text-muted" />
+          <ExternalLink
+            aria-hidden="true"
+            size={16}
+            className="text-text-muted"
+          />
         </Link>
 
         <Link
@@ -382,30 +570,59 @@ export function SettingsPage() {
           onClick={() => trackTermsViewed()}
           className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
         >
-          <FileSpreadsheet aria-hidden="true" size={20} className="text-accent shrink-0" />
+          <FileSpreadsheet
+            aria-hidden="true"
+            size={20}
+            className="text-accent shrink-0"
+          />
           <div className="text-left flex-1">
             <p className="font-medium text-sm">Terms of Service</p>
-            <p className="text-xs text-text-muted">Usage terms and clinical disclaimer</p>
+            <p className="text-xs text-text-muted">
+              Usage terms and clinical disclaimer
+            </p>
           </div>
-          <ExternalLink aria-hidden="true" size={16} className="text-text-muted" />
+          <ExternalLink
+            aria-hidden="true"
+            size={16}
+            className="text-text-muted"
+          />
         </Link>
       </section>
 
       {/* Support */}
       {isConfigured && (
         <section className="space-y-3">
-          <h2 className="font-semibold text-text text-sm uppercase tracking-wide">Support</h2>
+          <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+            Support
+          </h2>
           <button
-              onClick={() => { if (!user) { navigate('/login?returnTo=/support'); return; } trackSupportOpened(); navigate('/support'); }}
-              className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
-            >
-              <MessageCircle aria-hidden="true" size={20} className="text-accent shrink-0" />
-              <div className="text-left flex-1">
-                <p className="font-medium text-sm">Get help or report an issue</p>
-                <p className="text-xs text-text-muted">Report a bug or suggest a new feature</p>
-              </div>
-              <ChevronRight aria-hidden="true" size={16} className="text-text-muted" />
-            </button>
+            onClick={() => {
+              if (!user) {
+                navigate("/login?returnTo=/support");
+                return;
+              }
+              trackSupportOpened();
+              navigate("/support");
+            }}
+            className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-border rounded-lg hover:border-primary-light transition-colors"
+          >
+            <MessageCircle
+              aria-hidden="true"
+              size={20}
+              className="text-accent shrink-0"
+            />
+            <div className="text-left flex-1">
+              <p className="font-medium text-sm">Get help or report an issue</p>
+              <p className="text-xs text-text-muted">
+                Report a bug or suggest a new feature
+              </p>
+            </div>
+            <ChevronRight
+              aria-hidden="true"
+              size={16}
+              className="text-text-muted"
+            />
+          </button>
         </section>
       )}
 
@@ -422,7 +639,9 @@ export function SettingsPage() {
           <Trash2 aria-hidden="true" size={20} />
           <div className="text-left">
             <p className="font-semibold text-sm">Clear all operations</p>
-            <p className="text-xs opacity-80">Permanently delete all local operation data</p>
+            <p className="text-xs opacity-80">
+              Permanently delete all local operation data
+            </p>
           </div>
         </button>
 
@@ -433,15 +652,23 @@ export function SettingsPage() {
               disabled={deleting}
               className="w-full flex items-center gap-3 p-3 bg-surface-raised border border-red-200 rounded-lg hover:border-danger transition-colors"
             >
-              <AlertTriangle aria-hidden="true" size={20} className="text-danger" />
+              <AlertTriangle
+                aria-hidden="true"
+                size={20}
+                className="text-danger"
+              />
               <div className="text-left">
                 <p className="font-medium text-sm text-danger">
-                  {deleting ? 'Deleting...' : deleteConfirmStep === 0 ? 'Delete Account & All Data' : 'Confirm: Delete Everything'}
+                  {deleting
+                    ? "Deleting..."
+                    : deleteConfirmStep === 0
+                      ? "Delete Account & All Data"
+                      : "Confirm: Delete Everything"}
                 </p>
                 <p className="text-xs text-text-muted">
                   {deleteConfirmStep === 0
-                    ? 'Permanently remove your account and all cloud data'
-                    : 'This cannot be undone. All operations, settings, and your account will be permanently deleted.'}
+                    ? "Permanently remove your account and all cloud data"
+                    : "This cannot be undone. All operations, settings, and your account will be permanently deleted."}
                 </p>
               </div>
             </button>
@@ -453,18 +680,30 @@ export function SettingsPage() {
                 Cancel
               </button>
             )}
-            {deleteError && <p role="alert" className="text-sm text-danger">{deleteError}</p>}
+            {deleteError && (
+              <p role="alert" className="text-sm text-danger">
+                {deleteError}
+              </p>
+            )}
           </div>
         )}
       </section>
 
       {/* About */}
       <section className="space-y-2">
-        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">About</h2>
-        <p className="text-sm text-text-muted">Theatrelog v0.2.0 — Surgical operation logbook</p>
+        <h2 className="font-semibold text-text text-sm uppercase tracking-wide">
+          About
+        </h2>
+        <p className="text-sm text-text-muted">
+          Theatrelog v0.2.0 — Surgical operation logbook
+        </p>
         <p className="text-xs text-text-muted">
-          Data stored locally on device.{' '}
-          {user && isConfigured ? 'Cloud sync active.' : isConfigured ? 'Sign in for cloud sync.' : 'Configure Firebase for cloud sync.'}
+          Data stored locally on device.{" "}
+          {user && isConfigured
+            ? "Cloud sync active."
+            : isConfigured
+              ? "Sign in for cloud sync."
+              : "Configure Firebase for cloud sync."}
         </p>
         <p className="text-xs text-text-muted">
           Deleted operations are permanently purged after 30 days.
