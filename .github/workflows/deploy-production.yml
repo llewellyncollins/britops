@@ -20,7 +20,8 @@ jobs:
       - run: npm ci
       - name: Configure Stripe extension
         run: |
-          cat > ext-stripe-params.env << 'PARAMS'
+          mkdir -p extensions
+          cat > extensions/firestore-stripe-payments.env << 'PARAMS'
           LOCATION=europe-west2
           STRIPE_API_KEY=${{ secrets.PROD_STRIPE_API_KEY }}
           CUSTOMERS_COLLECTION=customers
@@ -30,7 +31,8 @@ jobs:
       - name: Deploy Firestore rules and extensions
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_THEATRELOG_84575 }}' > /tmp/sa.json
-          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules,extensions --project theatrelog-84575 --non-interactive
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules --project theatrelog-84575 --non-interactive
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only extensions --project theatrelog-84575 --non-interactive
       - run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
